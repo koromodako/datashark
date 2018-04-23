@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: memory_map.py
+#     file: coloring_formatter.py
 #     date: 2018-04-23
 #   author: paul.dautry
 #  purpose:
@@ -25,15 +25,57 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from logging import Formatter
+from termcolor import colored
+from core.helper.ms import assert_ms_windows
 # =============================================================================
-#  GLOBALS / CONFIG
+#  GLOBALS
 # =============================================================================
-# =============================================================================
-#  FUNCTIONS
-# =============================================================================
+COLORED = True
+if assert_ms_windows(raise_exc=False):
+    COLORED = False
 # =============================================================================
 #  CLASSES
 # =============================================================================
-# =============================================================================
-#  SCRIPT
-# =============================================================================
+class ColoringFormatter(Formatter):
+    '''[summary]
+
+    [description]
+
+    Extends:
+        logging.Formatter
+
+    Variables:
+        COLORS {dict} -- [description]
+    '''
+    COLORS = {
+        'DEBUG': 'green',
+        'INFO': 'blue',
+        'WARNING': 'yellow',
+        'ERROR': 'red',
+        'CRITICAL': 'magenta'
+    }
+
+    def __init__(self, fmt=None, datefmt=None, style='%'):
+        '''Constructs the object
+
+        Keyword Arguments:
+            fmt {[type]} -- [description] (default: {None})
+            datefmt {[type]} -- [description] (default: {None})
+            style {str} -- [description] (default: {'%'})
+        '''
+        super(ColoringFormatter, self).__init__(fmt, datefmt, style)
+
+    def format(self, record):
+        '''Colorize the log record
+
+        Arguments:
+            record {[type]} -- [description]
+
+        Returns:
+            [type] -- [description]
+        '''
+        os = super(ColoringFormatter, self).format(record)
+        if COLORED:
+            os = colored(os, self.__class__.COLORS[record.levelname])
+        return os

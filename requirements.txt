@@ -1,3 +1,5 @@
 slugify
 pycrypto
+termcolor
 ruamel.yaml
+python-magic
