@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: formatter.py
-#     date: 2018-03-25
+#     file: database_object.py
+#     date: 2018-04-02
 #   author: paul.dautry
 #  purpose:
 #
@@ -25,7 +25,34 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from enum import Enum
 # =============================================================================
-#  FUNCTIONS
+#  CLASSES
 # =============================================================================
+class DatabaseObject:
+    """[summary]
+
+    [description]
+    """
+    def from_db(self, doc):
+        """Loads a document (dict) which is returned by any DatabaseConnector
+
+        Loads all persistent properties of an object from a dict.
+
+        Arguments:
+            doc {dict} -- [description]
+        """
+        raise NotImplementedError("DatabaseObject subclasses must implement "
+                                  "from_db() method.")
+
+    def to_db(self):
+        """Creates a document (dict) which can be used by any DatabaseConnector
+
+        Creates a dict which contains all persistent properties of an object.
+
+        Returns:
+            {dict} -- [description]
+        """
+        raise NotImplementedError("DatabaseObject subclasses must implement "
+                                  "to_db() method.")
 

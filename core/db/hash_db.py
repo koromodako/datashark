@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: formatter.py
-#     date: 2018-03-25
+#     file: hash_db.py
+#     date: 2018-04-03
 #   author: paul.dautry
 #  purpose:
 #
@@ -25,7 +25,24 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from core.db.database import Database
 # =============================================================================
-#  FUNCTIONS
+#  CLASSES
 # =============================================================================
+class HashDatabase(Database):
+    """[summary]
 
+    [description]
+
+    Extends:
+        Database
+    """
+    def __init__(self, connector):
+        """[summary]
+
+        [description]
+
+        Arguments:
+            connector {DatabaseConnector} -- [description]
+        """
+        super().__init__(connector)

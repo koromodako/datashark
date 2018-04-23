@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: formatter.py
-#     date: 2018-03-25
+#     file: wrapper.py
+#     date: 2018-04-03
 #   author: paul.dautry
 #  purpose:
 #
@@ -25,7 +25,21 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from functools import wraps
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
+def lazy():
+    def wrapper(f):
+        @wraps(f)
+        def wrapped(self, *args, **kwds):
+            member_name = '_lazy_{}'.format(f.__name__)
 
+            if not hasattr(self, member_name):
+                setattr(self, member_name, f(self, *args, **kwds))
+
+            return getattr(self, member_name)
+
+        return wrapped
+
+    return wrapper

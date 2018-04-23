@@ -1,0 +1,3 @@
+slugify
+pycrypto
+ruamel.yaml

@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: container.py
+#     file: dissection.py
 #     date: 2018-04-03
 #   author: paul.dautry
 #  purpose:
@@ -29,11 +29,10 @@ from uuid import UUID, uuid4
 from pathlib import Path
 from slugify import slugify
 from core.db.object import DatabaseObject
-from core.file_type_guesser import FileTypeGuesser
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class Container(DatabaseObject):
+class Dissection(DatabaseObject):
     """[summary]
 
     [description]
@@ -42,30 +41,8 @@ class Container(DatabaseObject):
                  parent=None,
                  path=None,
                  original_path=None,
-                 name=None,
-                 magic_file=None):
-        """[summary]
-
-        [description]
-
-        Keyword Arguments:
-            parent {UUID} -- [description] (default: {None})
-            path {Path} -- [description] (default: {None})
-            original_path {Path} -- [description] (default: {None})
-            name {str} -- [description] (default: {None})
-            magic_file {str} -- [description] (default: {None})
-        """
-        super().__init__()
-
-        if parent is not None and not isinstance(parent, UUID):
-            raise ValueError("parent must be an instance of uuid.UUID")
-        if path is not None and not isinstance(path, Path):
-            raise ValueError("path must be an instance of pathlib.Path")
-        if original_path is not None and not isinstance(original_path, Path):
-            raise ValueError("original_path must be an instance of pathlib.Path")
-        if name is not None and not isinstance(name, str):
-            raise ValueError("name must be an instance of str")
-
+                 name=None):
+        super(Dissection, self).__init__()
         self.parent = parent
         self.path = path
         self.original_path = original_path
@@ -73,9 +50,6 @@ class Container(DatabaseObject):
         # computed once
         self.uuid = uuid4()
         self.size = None
-        guesser = FileTypeGuesser(magic_file=magic_file)
-        self.mime_text = guesser.mime_text()
-        self.mime_type = guesser.mime_type()
         if self.path is not None:
             stat = self.path.stat()
             self.size = stat.st_size
@@ -88,14 +62,12 @@ class Container(DatabaseObject):
         Arguments:
             doc {dict} -- [description]
         """
-        self.uuid = UUID(doc['uuid'])
-        self.parent = UUID(doc['parent'])
-        self.path = Path(doc['path'])
-        self.original_path = Path(doc['original_path'])
-        self.mime_type = doc['mime_type']
-        self.mime_text = doc['mime_text']
-        self.slug = doc['slug']
-        self.size = doc['size']
+        self.parent =
+        self.path =
+        self.original_path =
+        self.slug =
+        self.uuid = UUID()
+        self.stat =
 
     def to_db(self):
         """Creates a document (dict) which can be used by any DatabaseConnector
@@ -105,13 +77,7 @@ class Container(DatabaseObject):
         Returns:
             {dict} -- [description]
         """
-        return {
-            'uuid': self.uuid.urn,
-            'parent': self.parent.urn,
-            'path': str(self.path),
-            'original_path': str(self.original_path),
-            'mime_type': self.mime_type,
-            'mime_text': self.mime_text,
-            'slug': self.slug,
-            'size': self.size
-        }
+        raise NotImplementedError("DatabaseObject subclasses must implement "
+                                  "to_db() method.")
+
+
