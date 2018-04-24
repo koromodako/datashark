@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: configuration.py
-#     date: 2018-04-03
+#     file: examiner.py
+#     date: 2018-04-24
 #   author: paul.dautry
 #  purpose:
 #
@@ -25,70 +25,52 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from munch import munchify
-from ruamel.yaml import safe_load, safe_dump
-from helper.wrapper import lazy
+from core.plugin.plugin import Plugin
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class Configuration:
+
+class Examiner(Plugin):
     '''[summary]
 
     [description]
 
     Extends:
-        Munch
+        Plugin
     '''
-    def __init__(self, path):
+    def __init__(self, name):
         '''[summary]
+
+        [description]
 
         Arguments:
-            path {Path} -- [description]
+            name {[type]} -- [description]
         '''
-        self.path = path
-        self._conf = None
+        super().__init__(Plugin.Type.EXAMINER, name)
 
-    @property
-    @lazy
-    def conf(self):
+    def supported_mime_types(self):
+        '''[summary]
+
+        [description]
+        '''
+        return self._instance.supported_mime_types()
+
+    def can_examine(self, container):
         '''[summary]
 
         [description]
 
-        Decorators:
-            lazy
-
-        Returns:
-            [type] -- [description]
+        Arguments:
+            container {[type]} -- [description]
         '''
-        return munchify(self._conf)
+        return self._instance.can_examine(container)
 
-    def load(self):
+    async def examine(self, container):
         '''[summary]
 
         [description]
 
-        Returns:
-            bool -- [description]
+        Arguments:
+            container {[type]} -- [description]
         '''
-        try:
-            with self.path.open('r') as f:
-                self._conf = safe_load(f)
-            return True
-        except Exception as e:
-            return False
-
-    def save(self):
-        '''[summary]
-
-        [description]
-
-        Returns:
-            bool -- [description]
-        '''
-        try:
-            with self.path.open('w') as f:
-                safe_dump(f, self._conf)
-            return True
-        except Exception as e:
-            return False
+        return await self._instance.examine(container)

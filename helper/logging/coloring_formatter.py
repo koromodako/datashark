@@ -27,7 +27,7 @@
 # =============================================================================
 from logging import Formatter
 from termcolor import colored
-from core.helper.ms import assert_ms_windows
+from helper.ms import assert_ms_windows
 # =============================================================================
 #  GLOBALS
 # =============================================================================

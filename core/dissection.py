@@ -33,10 +33,10 @@ from core.db.object import DatabaseObject
 #  CLASSES
 # =============================================================================
 class Dissection(DatabaseObject):
-    """[summary]
+    '''[summary]
 
     [description]
-    """
+    '''
     def __init__(self,
                  parent=None,
                  path=None,
@@ -55,13 +55,13 @@ class Dissection(DatabaseObject):
             self.size = stat.st_size
 
     def from_db(self, doc):
-        """Loads a document (dict) which is returned by any DatabaseConnector
+        '''Loads a document (dict) which is returned by any DatabaseConnector
 
         Loads all persistent properties of an object from a dict.
 
         Arguments:
             doc {dict} -- [description]
-        """
+        '''
         self.parent =
         self.path =
         self.original_path =
@@ -70,13 +70,13 @@ class Dissection(DatabaseObject):
         self.stat =
 
     def to_db(self):
-        """Creates a document (dict) which can be used by any DatabaseConnector
+        '''Creates a document (dict) which can be used by any DatabaseConnector
 
         Creates a dict which contains all persistent properties of an object.
 
         Returns:
             {dict} -- [description]
-        """
+        '''
         raise NotImplementedError("DatabaseObject subclasses must implement "
                                   "to_db() method.")
 

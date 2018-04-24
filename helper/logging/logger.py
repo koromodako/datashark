@@ -29,7 +29,7 @@ from sys import stderr
 from enum import Enum
 from logging import getLogger, Formatter, StreamHandler, DEBUG, INFO, ERROR
 from logging.handlers import RotatingFileHandler
-from core.helper.logging.coloring_formatter import ColoringFormatter
+from helper.logging.coloring_formatter import ColoringFormatter
 # =============================================================================
 #  CLASSES
 # =============================================================================

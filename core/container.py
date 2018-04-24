@@ -34,17 +34,17 @@ from core.file_type_guesser import FileTypeGuesser
 #  CLASSES
 # =============================================================================
 class Container(DatabaseObject):
-    """[summary]
+    '''[summary]
 
     [description]
-    """
+    '''
     def __init__(self,
                  parent=None,
                  path=None,
                  original_path=None,
                  name=None,
                  magic_file=None):
-        """[summary]
+        '''[summary]
 
         [description]
 
@@ -54,7 +54,7 @@ class Container(DatabaseObject):
             original_path {Path} -- [description] (default: {None})
             name {str} -- [description] (default: {None})
             magic_file {str} -- [description] (default: {None})
-        """
+        '''
         super().__init__()
 
         if parent is not None and not isinstance(parent, UUID):
@@ -81,13 +81,13 @@ class Container(DatabaseObject):
             self.size = stat.st_size
 
     def from_db(self, doc):
-        """Loads a document (dict) which is returned by any DatabaseConnector
+        '''Loads a document (dict) which is returned by any DatabaseConnector
 
         Loads all persistent properties of an object from a dict.
 
         Arguments:
             doc {dict} -- [description]
-        """
+        '''
         self.uuid = UUID(doc['uuid'])
         self.parent = UUID(doc['parent'])
         self.path = Path(doc['path'])
@@ -98,13 +98,13 @@ class Container(DatabaseObject):
         self.size = doc['size']
 
     def to_db(self):
-        """Creates a document (dict) which can be used by any DatabaseConnector
+        '''Creates a document (dict) which can be used by any DatabaseConnector
 
         Creates a dict which contains all persistent properties of an object.
 
         Returns:
             {dict} -- [description]
-        """
+        '''
         return {
             'uuid': self.uuid.urn,
             'parent': self.parent.urn,

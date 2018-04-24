@@ -26,9 +26,9 @@
 #  IMPORTS
 # =============================================================================
 from pathlib import Path
-from core.helper.memory_map import MemoryMap
-from core.helper.logging.logger import Logger
-from core.helper.formatting.formatter import Formatter
+from helper.memory_map import MemoryMap
+from helper.logging.logger import Logger
+from helper.formatting.formatter import Formatter
 # =============================================================================
 #  GLOBALS / CONFIG
 # =============================================================================
@@ -36,7 +36,7 @@ LGR = Logger(Logger.Type.CORE, 'bin_file')
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class BinFile(object):
+class BinFile:
 
     @staticmethod
     def exists(path):

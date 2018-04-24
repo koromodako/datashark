@@ -25,45 +25,47 @@
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class Registry(object):
-    """[summary]
+class Registry:
+    '''[summary]
 
     [description]
-    """
+    '''
     def __init__(self):
-        """[summary]
+        '''[summary]
 
         [description]
 
         Arguments:
             arg {[type]} -- [description]
-        """
+        '''
         super(Registry, self).__init__()
-        self.plugins = {}
+        self._plugins = {}
 
     def register(self, plugin):
-        """Registers a plugin
+        '''Registers a plugin
 
         Arguments:
-            plugin {Plugin} -- Plugin to be registered
-        """
-        if plugin.type not in self.plugins:
-            self.plugins[plugin.type] = {}
-        self.plugins[plugin.type][plugin.slug] = plugin
+            plugin {Plugin} -- Plugin instance to be registered
+        '''
+        if plugin.type not in self._plugins:
+            self._plugins[plugin.type] = {}
+        self._plugins[plugin.type][plugin.slug] = plugin
 
-    def plugins(self, type):
-        """[summary]
+    def plugins(self, type=None):
+        '''[summary]
 
         Arguments:
             type {Plugin.Type} -- [description]
 
         Returns:
             dict or None -- [description]
-        """
-        return self.plugins.get(type)
+        '''
+        if not type:
+            return self._plugins
+        return self._plugins.get(type)
 
     def plugin(self, type, slug):
-        """
+        '''Returns a plugin
 
         Arguments:
             type {Plugin.Type} -- [description]
@@ -71,5 +73,5 @@ class Registry(object):
 
         Returns:
             Plugin or None -- [description]
-        """
-        return self.plugins.get(type, {}).get(slug)
+        '''
+        return self._plugins.get(type, {}).get(slug)

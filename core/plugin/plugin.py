@@ -27,43 +27,49 @@
 # =============================================================================
 from enum import Enum
 from slugify import slugify
+from helper.logging.logger import Logger
 # =============================================================================
 #  CLASSES
 # =============================================================================
 class Plugin:
-    """Generic Datashark plugin
+    '''Generic Datashark plugin
 
     Interface for a generic Datashark plugin
-    """
+    '''
 
     class Type(Enum):
-        """Describe the type of plugin
+        '''Describe the type of plugin
 
         Extends:
             Enum
-        """
-        DATABASE = 'database'
-        INSPECTOR = 'inspector'
+        '''
+        DRIVER = 'driver'
+        PARSER = 'parser'
+        EXAMINER = 'examiner'
         DISSECTION = 'dissection'
+        DB_CONNECTOR = 'db_connector'
 
     def __init__(self, type, name):
-        """Constructs a new instance
+        '''Constructs a new instance
 
         Arguments:
             type {Plugable.Type} -- Plugin's type
             name {str} -- Plugin's name
-        """
+        '''
         super(Plugable, self).__init__()
         self.type = type
         self.name = name
         self.slug = slugify(name)
-        self.instance = None
+        self.logger = Logger(Logger.Type.PLUGIN, '{}.{}'.format(type, slug))
+        self._instance = None
 
     def __str__(self):
-        return "plugin: {} [{}]".format(self.name, self.slug)
+        return "Plugin(type={},name={},slug={})".format(self.type,
+                                                        self.name,
+                                                        self.slug)
 
     async def init(self, gconf, pconf):
-        """Initializes the plugin
+        '''Initializes the plugin
 
         Datashark framework ensure that this operation is called and is
         the first operation called on a plugin instance.
@@ -75,16 +81,16 @@ class Plugin:
         Arguments:
             gconf {dict} -- Global configuration
             pconf {dict} -- Plugin-specific configuration
-        """
+        '''
         raise NotImplementedError("Plugin subclasses must implement init()")
 
     async def term(self):
-        """Terminates the plugin
+        '''Terminates the plugin
 
         Datashark framework ensure that this operation is called and is
         the last operation called on a plugin instance.
 
         1. This method shall perform all cleaning operations relative to
            self.instance.
-        """
+        '''
         raise NotImplementedError("Plugin subclasses must implement term()")

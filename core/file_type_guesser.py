@@ -30,32 +30,32 @@ from magic import Magic
 #  CLASSES
 # =============================================================================
 class FileTypeGuesser:
-    """Guess file MIME type from content using a magic file"""
+    '''Guess file MIME type from content using a magic file'''
     def __init__(self, magic_file=None):
-        """[summary]
+        '''[summary]
 
         [description]
 
         Keyword Arguments:
             magic_file {str} -- Magic database to use (default: {None})
-        """
+        '''
         self.magic_file = magic_file
 
     def mime_text(self, path):
-        """Returns a textual description of the MIME type.
+        '''Returns a textual description of the MIME type.
 
         Arguments:
             path {Path} -- Path of the file to analyze
-        """
+        '''
         magic = Magic(magic_file=magic_file)
         return magic.from_file(str(path))
 
     def mime_type(self, path):
-        """Returns a MIME description of the MIME type.
+        '''Returns a MIME description of the MIME type.
 
         Arguments:
             path {Path} -- Path of the file to analyze
-        """
+        '''
         magic = Magic(magic_file=self.magic_file, mime=True)
         return magic.from_file(str(path))
 

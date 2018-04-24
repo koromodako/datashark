@@ -30,19 +30,19 @@ from core.db.database import Database
 #  CLASSES
 # =============================================================================
 class DissectionDatabase(Database):
-    """[summary]
+    '''[summary]
 
     [description]
 
     Extends:
         Database
-    """
+    '''
     def __init__(self, connector):
-        """[summary]
+        '''[summary]
 
         [description]
 
         Arguments:
             connector {DatabaseConnector} -- [description]
-        """
+        '''
         super().__init__(connector)

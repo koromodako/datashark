@@ -30,63 +30,58 @@ from core.plugin.plugin import Plugin
 #  CLASSES
 # =============================================================================
 class DatabaseConnector(Plugin):
-    """[summary]
-
-    [description]
+    '''DatabaseConnector
 
     Extends:
         Plugin
-    """
+    '''
     def __init__(self, name):
-        """[summary]
+        '''[summary]
 
         [description]
 
         Arguments:
             name {[type]} -- [description]
-        """
-        super().__init__(Plugin.Type.DATABASE, name)
+        '''
+        super().__init__(Plugin.Type.DB_CONNECTOR, name)
 
     def __str__(self):
-        return "db-connector: {}".format(self.name)
+        return "DatabaseConnector(name={})".format(self.name)
 
     async def connect(self):
-        """[summary]
+        '''[summary]
 
         [description]
 
         Returns:
             {bool} - True if conection succeeded, False otherwise
-        """
-        raise NotImplementedError("subclasses of DatabaseConnector must "
-                                  "implement connect().")
+        '''
+        return await self._instance.connect()
 
     async def disconnect(self):
-        """Disconnects the program from database closing all underlying
+        '''Disconnects the program from database closing all underlying
         sessions if any.
 
         [description]
-        """
-        raise NotImplementedError("subclasses of DatabaseConnector must "
-                                  "implement disconnect().")
+        '''
+        return await self._instance.disconnect()
 
-    async def persist(self, objs):
-        """[summary]
+    async def persist(self, objects):
+        '''[summary]
 
         [description]
 
         Arguments:
-            objs {DatabaseObject} -- Dict or list of dicts representing
-                                     object(s) to be created or updated an
-                                     object.
+            objects {DatabaseObject} -- Dict or list of dicts representing
+                                        object(s) to be created or updated an
+                                        object.
         Returns:
             {bool} - True if persitence succeeded, False otherwise
-        """
-        raise NotImplementedError("subclasses of DatabaseConnector must "
-                                  "implement persist().")
+        '''
+        return await self._instance.persit(objects)
 
     async def retrieve(self, query):
-        """[summary]
+        '''[summary]
 
         [description]
 
@@ -96,12 +91,11 @@ class DatabaseConnector(Plugin):
                             subclass to retrieve an object.
         Returns:
             {list} - list of dicts being retrieved objects
-        """
-        raise NotImplementedError("subclasses of DatabaseConnector must "
-                                  "implement retrieve().")
+        '''
+        return await self._instance.retrieve(query)
 
     async def delete(self, query):
-        """[summary]
+        '''[summary]
 
         [description]
 
@@ -111,6 +105,5 @@ class DatabaseConnector(Plugin):
                             subclass to delete one or more objects.
         Returns:
             {int} - Number of objects deleted.
-        """
-        raise NotImplementedError("subclasses of DatabaseConnector must "
-                                  "implement delete().")
+        '''
+        return await self._instance.delete(query)

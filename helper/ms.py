@@ -26,7 +26,7 @@
 #  IMPORTS
 # =============================================================================
 from os import name
-from core.helper.exception import MSWindowsSpecificFeatureException
+from helper.exception import MSWindowsSpecificFeatureException
 from core.
 # =============================================================================
 #  GLOBALS / CONFIG

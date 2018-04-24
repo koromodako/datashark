@@ -31,41 +31,41 @@ from core.db.object import DatabaseObject
 #  CLASSES
 # =============================================================================
 class Database:
-    """[summary]
+    '''[summary]
 
     [description]
-    """
+    '''
     def __init__(self, connector):
-        """[summary]
+        '''[summary]
 
         [description]
 
         Arguments:
             connector {DatabaseConnector} -- [description]
-        """
+        '''
         self.connector = connector
         self.connected = False
 
     async def init(self):
-        """[summary]
+        '''[summary]
 
         [description]
-        """
+        '''
         self.connected = await self.connector.connect()
 
     async def term(self):
-        """[summary]
+        '''[summary]
 
         [description]
-        """
+        '''
         await self.connector.disconnect()
         self.connected = False
 
     async def persist(self, objs):
-        """Persists one or more objects
+        '''Persists one or more objects
 
         See DatabaseConnector.persist() for details
-        """
+        '''
         objects = []
 
         for obj in objs:
@@ -78,15 +78,15 @@ class Database:
         return await self.connector.persist(objects)
 
     async def retrieve(self, query):
-        """Retrieves one or more objects
+        '''Retrieves one or more objects
 
         See DatabaseConnector.persist() for details
-        """
+        '''
         return await self.connector.retrieve(query)
 
     async def delete(self, query):
-        """Deletes one or more objects
+        '''Deletes one or more objects
 
         See DatabaseConnector.persist() for details
-        """
+        '''
         return await self.connector.delete(query)
