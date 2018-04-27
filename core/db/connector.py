@@ -30,10 +30,9 @@ from core.plugin.plugin import Plugin
 #  CLASSES
 # =============================================================================
 class DatabaseConnector(Plugin):
-    '''DatabaseConnector
+    '''DatabaseConnector class
 
-    Extends:
-        Plugin
+    Represents a generic connection with a database. It defines an interface.
     '''
     def __init__(self, name):
         '''[summary]

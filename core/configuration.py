@@ -35,9 +35,6 @@ class Configuration:
     '''[summary]
 
     [description]
-
-    Extends:
-        Munch
     '''
     def __init__(self, path):
         '''[summary]

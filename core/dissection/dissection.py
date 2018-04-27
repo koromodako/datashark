@@ -25,34 +25,22 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from uuid import UUID, uuid4
-from pathlib import Path
-from slugify import slugify
 from core.db.object import DatabaseObject
+from helper.logging.logger import Logger
+# =============================================================================
+#  GLOBALS
+# =============================================================================
+LGR = Logger(Logger.Type.CORE, 'dissection')
 # =============================================================================
 #  CLASSES
 # =============================================================================
 class Dissection(DatabaseObject):
-    '''[summary]
+    '''Represent a full dissection case
 
-    [description]
+    Keep track of all resources linked to a dissection and dissection results.
     '''
-    def __init__(self,
-                 parent=None,
-                 path=None,
-                 original_path=None,
-                 name=None):
-        super(Dissection, self).__init__()
-        self.parent = parent
-        self.path = path
-        self.original_path = original_path
-        self.slug = slugify(name)
-        # computed once
-        self.uuid = uuid4()
-        self.size = None
-        if self.path is not None:
-            stat = self.path.stat()
-            self.size = stat.st_size
+    def __init__(self):
+        super().__init__()
 
     def from_db(self, doc):
         '''Loads a document (dict) which is returned by any DatabaseConnector
@@ -62,12 +50,9 @@ class Dissection(DatabaseObject):
         Arguments:
             doc {dict} -- [description]
         '''
-        self.parent =
-        self.path =
-        self.original_path =
-        self.slug =
-        self.uuid = UUID()
-        self.stat =
+        raise NotImplementedError("DatabaseObject subclasses must implement "
+                                  "to_db() method.")
+
 
     def to_db(self):
         '''Creates a document (dict) which can be used by any DatabaseConnector

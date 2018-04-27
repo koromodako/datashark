@@ -35,6 +35,8 @@ LGR = Logger(Logger.Type.CORE, 'table')
 # =============================================================================
 
 class Table:
+    '''Represents a printable ASCII table
+    '''
 
     def __init__(self, cols=[]):
         '''Constructs the object

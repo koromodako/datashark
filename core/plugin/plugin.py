@@ -38,15 +38,10 @@ class Plugin:
     '''
 
     class Type(Enum):
-        '''Describe the type of plugin
-
-        Extends:
-            Enum
+        '''Plugin's types enumeration
         '''
-        DRIVER = 'driver'
-        PARSER = 'parser'
         EXAMINER = 'examiner'
-        DISSECTION = 'dissection'
+        DISSECTOR = 'dissector'
         DB_CONNECTOR = 'db_connector'
 
     def __init__(self, type, name):
@@ -67,6 +62,10 @@ class Plugin:
         return "Plugin(type={},name={},slug={})".format(self.type,
                                                         self.name,
                                                         self.slug)
+
+    @property
+    def initialized(self):
+        return (self._instance is not None)
 
     async def init(self, gconf, pconf):
         '''Initializes the plugin

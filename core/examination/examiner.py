@@ -31,46 +31,46 @@ from core.plugin.plugin import Plugin
 # =============================================================================
 
 class Examiner(Plugin):
-    '''[summary]
+    '''Examiner class
 
-    [description]
-
-    Extends:
-        Plugin
+    Represents an object able to perform consistency/compliance checks on
+    several elements of a container. These elements includes the following:
+        * compliance with file format specifications, if there is any
+        * consistency of data in terms of security (ex: integrity of records
+          of a SQLite database or a Windows registry file)
+        * and other things specific to some formats
     '''
     def __init__(self, name):
-        '''[summary]
-
-        [description]
+        '''Constructs an object
 
         Arguments:
-            name {[type]} -- [description]
+            name {str} -- Examiner unique name
         '''
         super().__init__(Plugin.Type.EXAMINER, name)
 
     def supported_mime_types(self):
-        '''[summary]
-
-        [description]
+        '''Gives a list of MIME types which can be handled by this examiner
         '''
         return self._instance.supported_mime_types()
 
     def can_examine(self, container):
-        '''[summary]
+        '''Checks if examination can be performed
 
-        [description]
+        Checks if underlying examiner instance is able to perform an
+        examination of this container.
 
         Arguments:
-            container {[type]} -- [description]
+            container {Container} -- Container to check for examination
+                                     compatibility
         '''
         return self._instance.can_examine(container)
 
     async def examine(self, container):
-        '''[summary]
+        '''Examine a container
 
-        [description]
+        Performs the examination of the container.
 
         Arguments:
-            container {[type]} -- [description]
+            container {Container} -- Container to examine
         '''
         return await self._instance.examine(container)

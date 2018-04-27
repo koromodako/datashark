@@ -25,5 +25,14 @@
 # =============================================================================
 #  CLASSES
 # =============================================================================
+class InvalidPluginTypeException(Exception):
+    pass
+
+class UninitializedPluginException(Exception):
+    pass
+
+class LinuxSpecificFeatureException(Exception):
+    pass
+
 class MSWindowsSpecificFeatureException(Exception):
     pass

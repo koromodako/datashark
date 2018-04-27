@@ -35,36 +35,28 @@ LGR = Logger(Logger.Type.CORE, 'column')
 # =============================================================================
 
 class Column:
-    '''[summary]
-
-    [description]
+    '''Column definition for printable ASCII table
     '''
+
     class Alignment(Enum):
-        '''[summary]
-
-        [description]
-
-        Extends:
-            Enum
+        '''Column's content alignment enumeration
 
         Variables:
-            LEFT {number} -- [description]
-            RIGHT {number} -- [description]
-            CENTERED {number} -- [description]
+            LEFT {int} -- [description]
+            RIGHT {int} -- [description]
+            CENTERED {int} -- [description]
         '''
         LEFT = 0
         RIGHT = 1
         CENTERED = 2
 
     def __init__(self, name=None, alignment=Alignment.LEFT, fmtr=None):
-        '''[summary]
-
-        [description]
+        '''Constructs the object
 
         Keyword Arguments:
-            name {[type]} -- [description] (default: {None})
-            alignment {[type]} -- [description] (default: {Alignment.LEFT})
-            fmtr {[type]} -- [description] (default: {None})
+            name {str} -- [description] (default: {None})
+            alignment {Column.Alignment} -- [description] (default: {Alignment.LEFT})
+            fmtr {function} -- [description] (default: {None})
         '''
         self.name = name
         if not isinstance(alignment, Column.Alignment):
@@ -77,10 +69,11 @@ class Column:
         '''Returns value formatted using given fmtr or str()
 
         Arguments:
-            value {[type]} -- [description]
+            value {Typing.Any} -- Value to be converted to its string
+                                  representation
 
         Returns:
-            [type] -- [description]
+            str -- String representation of input value
         '''
         if self.fmtr is not None:
             value = self.fmtr(value)
@@ -94,11 +87,11 @@ class Column:
         '''Add appropriate padding to respect alignment
 
         Arguments:
-            value {[type]} -- [description]
-            max_width {[type]} -- [description]
+            value {str} -- Input string to be aligned
+            max_width {int} -- Max width of the column
 
         Returns:
-            [type] -- [description]
+            str -- Aligned version of input value
         '''
         vlen = len(value)
         miss = (max_width - vlen + 2)

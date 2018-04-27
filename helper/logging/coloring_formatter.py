@@ -27,7 +27,7 @@
 # =============================================================================
 from logging import Formatter
 from termcolor import colored
-from helper.ms import assert_ms_windows
+from helper.win import assert_ms_windows
 # =============================================================================
 #  GLOBALS
 # =============================================================================
@@ -39,11 +39,6 @@ if assert_ms_windows(raise_exc=False):
 # =============================================================================
 class ColoringFormatter(Formatter):
     '''[summary]
-
-    [description]
-
-    Extends:
-        logging.Formatter
 
     Variables:
         COLORS {dict} -- [description]

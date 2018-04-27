@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: parser.py
-#     date: 2018-04-24
+#     file: orchestrator.py
+#     date: 2018-04-27
 #   author: paul.dautry
 #  purpose:
 #
@@ -25,23 +25,22 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from core.plugin.plugin import Plugin
+from helper.logging.logger import Logger
+# =============================================================================
+#  GLOBALS
+# =============================================================================
+LGR = Logger(Logger.Type.CORE, 'orchestrator')
 # =============================================================================
 #  CLASSES
 # =============================================================================
+class Orchestrator:
+    '''Orchestrator class
 
-class  Parser(Plugin):
-    '''[summary]
-
-    [description]
+    Divides master tasks into smaller tasks and hand them to instances of
+    Worker and wait for completion to aggregate the results.
     '''
-    def __init__(self, name):
-        '''[summary]
-
-        [description]
-
-        Arguments:
-            name {[type]} -- [description]
+    def __init__(self):
+        '''Constructs the object
         '''
-        super().__init__(Plugin.Type.PARSER, name)
+        pass
 

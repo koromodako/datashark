@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: driver.py
-#     date: 2018-04-24
+#     file: worker.py
+#     date: 2018-04-27
 #   author: paul.dautry
 #  purpose:
 #
@@ -25,23 +25,21 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from core.plugin.plugin import Plugin
+from helper.logging.logger import Logger
+# =============================================================================
+#  GLOBALS
+# =============================================================================
+LGR = Logger(Logger.Type.CORE, 'worker')
 # =============================================================================
 #  CLASSES
 # =============================================================================
+class Worker:
+    '''Worker class
 
-class Driver(Plugin):
-    '''Driver
-
-    Extends:
-        Plugin
+    Receives tasks from Orchestrator and perform them until completion or an
+    internal exception is raised and returns the result.
     '''
-    def __init__(self, name):
-        '''[summary]
-
-        [description]
-
-        Arguments:
-            name {[type]} -- [description]
+    def __init__(self):
+        '''Constructs the object
         '''
-        super().__init__(Plugin.Type.DRIVER, name)
+        pass

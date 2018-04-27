@@ -25,6 +25,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from enum import Enum
 from pathlib import Path
 from helper.memory_map import MemoryMap
 from helper.logging.logger import Logger
@@ -37,21 +38,32 @@ LGR = Logger(Logger.Type.CORE, 'bin_file')
 #  CLASSES
 # =============================================================================
 class BinFile:
+    '''Represents a regular file accessible in binary mode only
+    '''
+
+    class OpenMode(Enum):
+        '''BinFile's open modes enumeration
+        '''
+        READ = 'r'
+        WRITE = 'w'
+        CREATE = 'x'
+        APPEND = 'a'
 
     @staticmethod
     def exists(path):
-        '''[summary]
+        '''Test if given path exists and is a regular file
 
         Arguments:
-            path {[type]} -- [description]
+            path {Path} -- path of the file to test
 
         Returns:
-            [type] -- [description]
+            bool -- True if the file exists and is a regular file, False
+                    otherwise
         '''
         return path.is_file()
 
-    def __init__(self, path, mode):
-        '''[summary]
+    def __init__(self, path, mode=BinFile.OpenMode.READ):
+        '''Constructs an object
 
         Arguments:
             path {[type]} -- [description]
@@ -59,22 +71,22 @@ class BinFile:
         '''
         self.fp = None
         self.path = path if isinstance(path, Path) else Path(path)
-        self.mode = mode
+        self.mode = OpenMode(mode)
         self.dirname = path.parent
         self.basename = path.name
         self.rlvpath = path.resolve()
 
     def __enter__(self):
-        '''[summary]
+        '''Context manager __enter__ to enable the use of "with" statement
 
         Returns:
-            [type] -- [description]
+            BinFile -- Instance of binary file
         '''
         self.open()
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        '''[summary]
+        '''Context manager __exit__ to enable the use of "with" statement
 
         Arguments:
             exc_type {[type]} -- [description]
@@ -86,7 +98,7 @@ class BinFile:
         self.close()
 
     def is_valid(self):
-        '''[summary]
+        '''
         '''
         return (self.fp is not None)
 
@@ -217,7 +229,10 @@ class BinFile:
         return self.fp.write(data)
 
     def flush(self):
-        '''[summary]
+        '''Flushes file buffers to disk
+
+        Note:
+            Disk cache might still buffer this data
         '''
         self.fp.flush()
 
@@ -225,25 +240,30 @@ class BinFile:
         '''[summary]
 
         Arguments:
-            start {[type]} -- [description]
-            size {[type]} -- [description]
+            start {int} -- Start offset (in units)
+            size {int} -- Size to map from start (in units)
 
         Keyword Arguments:
-            unit {number} -- [description] (default: {1})
+            unit int -- Number of bytes in a single unit (default: {1})
 
         Returns:
-            [type] -- [description]
+            MemoryMap -- returns a memory map
         '''
         return MemoryMap(self, start, size, unit)
 
     def dump(self, size=-1, seek=None):
-        '''[summary]
+        '''Prints an hexdump of `size` bytes from `seek` offset.
+
+        Usage:
+            bf = BinFile()
+            print(bf.dump(size=512,seek=512))
 
         Keyword Arguments:
-            size {number} -- [description] (default: {-1})
-            seek {[type]} -- [description] (default: {None})
+            size {int} -- Size of the dump (in bytes) (default: {-1})
+            seek {int or None} -- Start offset of the dump (in bytes)
+                                  (default: {None})
 
         Returns:
-            [type] -- [description]
+            str -- Printable hexdump
         '''
         return Formatter.hexdump(self.read(size, seek))

@@ -33,41 +33,42 @@ from core.plugin.plugin import Plugin
 class Dissector(Plugin):
     '''Dissector
 
-    Extends:
-        Plugin
+    Represents a dissector, i.e. an object able to extract containers from a
+    parent container. This object will use one to several parsers to extract
+    all "sub-containers" contained by given container.
     '''
     def __init__(self, name):
         '''Constructs an object
 
         Arguments:
-            name {[type]} -- [description]
+            name {str} -- Dissector unique name
         '''
         super().__init__(Plugin.Type.DISSECTOR, name)
 
     def supported_mime_types(self):
-        '''[summary]
-
-        [description]
+        '''Gives a list of MIME types which can be handled by this dissector
         '''
         return self._instance.supported_mime_types()
 
     def can_dissect(self, container):
-        '''[summary]
+        '''Checks if dissection can be performed
 
-        [description]
+        Checks if underlying dissector instance is able to perform a dissection
+        of this container.
 
         Arguments:
-            container {[type]} -- [description]
+            container {Container} -- Container to check for dissection
+                                     compatibility
         '''
         return self._instance.can_dissect(container)
 
-    async def dissect(self, container):
-        '''[summary]
+    async def containers(self, container):
+        '''Extract containers from given container
 
-        [description]
+        Performs the dissection of the container.
 
         Arguments:
-            container {[type]} -- [description]
+            container {Container} -- Container to dissect
         '''
-        return await self._instance.dissect(container)
-
+        async for container in self._instance.containers(container):
+            yield container

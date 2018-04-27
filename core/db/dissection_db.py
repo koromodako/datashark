@@ -33,9 +33,6 @@ class DissectionDatabase(Database):
     '''[summary]
 
     [description]
-
-    Extends:
-        Database
     '''
     def __init__(self, connector):
         '''[summary]

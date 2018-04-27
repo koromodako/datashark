@@ -36,9 +36,10 @@ LGR = Logger(Logger.Type.CORE, 'formatter')
 # =============================================================================
 
 class Formatter:
-    '''[summary]
+    '''Formatter class
 
-    [description]
+    Provides many useful static methods to print bytefield using different
+    representations
     '''
 
     @staticmethod
@@ -58,7 +59,7 @@ class Formatter:
         '''[summary]
 
         Arguments:
-            size {[type]} -- [description]
+            size {number} -- [description]
 
         Keyword Arguments:
             suffix {str} -- [description] (default: {'B'})
@@ -77,16 +78,13 @@ class Formatter:
         '''[summary]
 
         Arguments:
-            data {[type]} -- [description]
+            data {bytes} -- [description]
 
         Keyword Arguments:
-            col_sz {number} -- [description] (default: {2})
-            col_num {number} -- [description] (default: {4})
+            col_sz {int} -- [description] (default: {2})
+            col_num {int} -- [description] (default: {4})
             human {bool} -- [description] (default: {True})
-            max_lines {number} -- [description] (default: {10})
-
-        Returns:
-            [type] -- [description]
+            max_lines {int} -- [description] (default: {10})
         '''
         lines = []
         row_sz = col_sz * col_num
@@ -126,13 +124,13 @@ class Formatter:
         '''[summary]
 
         Arguments:
-            data {[type]} -- [description]
+            data {bytes} -- [description]
 
         Keyword Arguments:
-            col_sz {number} -- [description] (default: {2})
-            col_num {number} -- [description] (default: {4})
+            col_sz {int} -- [description] (default: {2})
+            col_num {int} -- [description] (default: {4})
             human {bool} -- [description] (default: {True})
-            max_lines {number} -- [description] (default: {10})
+            max_lines {int} -- [description] (default: {10})
         '''
         return "\n".join(hexdump_lines(data, col_sz, col_num, human, max_lines))
 
@@ -141,16 +139,13 @@ class Formatter:
         '''[summary]
 
         Arguments:
-            d1 {[type]} -- [description]
-            d2 {[type]} -- [description]
+            d1 {bytes} -- First bytefield
+            d2 {bytes} -- Second bytefield
 
         Keyword Arguments:
-            col_sz {number} -- [description] (default: {2})
-            col_num {number} -- [description] (default: {4})
+            col_sz {int} -- [description] (default: {2})
+            col_num {int} -- [description] (default: {4})
             human {bool} -- [description] (default: {True})
-
-        Returns:
-            [type] -- [description]
         '''
         lines = []
 
@@ -212,8 +207,8 @@ class Formatter:
             d2 {[type]} -- [description]
 
         Keyword Arguments:
-            col_sz {number} -- [description] (default: {2})
-            col_num {number} -- [description] (default: {4})
+            col_sz {int} -- [description] (default: {2})
+            col_num {int} -- [description] (default: {4})
             human {bool} -- [description] (default: {True})
         '''
         return "\n".join(hexdiff_lines(d1, d2, col_sz, col_num, human))

@@ -38,10 +38,7 @@ class Logger:
     adding useful things
     '''
     class Type(Enum):
-        '''Logger's type
-
-        Extends:
-            Enum
+        '''Logger's types enumeration
 
         Variables:
             CORE {str} -- [description]

@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: ms.py
+#     file: win.py
 #     date: 2018-04-23
 #   author: paul.dautry
 #  purpose:
@@ -26,23 +26,26 @@
 #  IMPORTS
 # =============================================================================
 from os import name
+from helper.exception import LinuxSpecificFeatureException
 from helper.exception import MSWindowsSpecificFeatureException
-from core.
+from helper.logging.logger import Logger
 # =============================================================================
-#  GLOBALS / CONFIG
+#  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, 'ms')
+LGR = Logger(Logger.Type.CORE, 'win')
+WINDOWS = (name == 'nt')
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
-def assert_ms_windows(raise_exc=True):
-    ms_windows = False
+def assert_ms_windows(raise_exc=True, invert=False):
+    if invert and WINDOWS and raise_exc:
+        raise LinuxSpecificFeatureException("This feature can only be used on "
+                                            "Linux.")
 
-    if name != 'nt':
-        if raise_exc:
-            raise MSWindowsSpecificFeatureException
+    if not WINDOWS and raise_exc:
+        raise MSWindowsSpecificFeatureException("This feature can only be "
+                                                "used on Windows.")
 
-        ms_windows = True
-
-    LGR.debug('assert_ms_windows(): {}'.format(ms_windows))
-    return ms_windows
+    assertion_result = (not WINDOWS) if invert else WINDOWS
+    LGR.debug('assert_ms_windows(): {}'.format(assertion_result))
+    return assertion_result
