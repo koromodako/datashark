@@ -94,7 +94,7 @@ class BinFile:
             traceback {[type]} -- [description]
         '''
         if exc_type:
-            LGR.exception('an exception occured within caller with statement.')
+            LGR.exception("An exception occured within caller with statement.")
         self.close()
 
     def is_valid(self):
@@ -109,13 +109,13 @@ class BinFile:
             bool -- [description]
         '''
         if self.fp is not None:
-            LGR.warning("file is already opened.")
+            LGR.warning("File is already opened.")
             return False
 
         try:
             self.fp = self.path.open(self.mode+'b')
         except Exception as e:
-            LGR.exception("file open operation failed.")
+            LGR.exception("File open operation failed.")
             self.fp = None
             return False
 
@@ -128,7 +128,7 @@ class BinFile:
             bool -- [description]
         '''
         if self.fp is None:
-            LGR.warning("file is already closed.")
+            LGR.warning("File is already closed.")
             return False
 
         self.fp.close()

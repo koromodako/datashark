@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: worker.py
+#     file: process_worker.py
 #     date: 2018-04-27
 #   author: paul.dautry
 #  purpose:
@@ -26,39 +26,22 @@
 #  IMPORTS
 # =============================================================================
 from helper.logging.logger import Logger
+from core.orchestration.worker import Worker
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, 'worker')
+LGR = Logger(Logger.Type.CORE, 'process_worker')
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class Worker:
-    '''Worker class
+class ProcessWorker(Worker):
+    '''[summary]
 
-    Receives tasks from Orchestrator and perform them until completion or an
-    internal exception is raised and returns the result.
+    [description]
     '''
-    def __init__(self, num, configuration=None):
-        '''Constructs the object
-        '''
-        self.num = num
-        self.tasks = None
-        self.configuration = configuration
-
     async def _perform_tasks(self):
-        '''Worker starts performing tasks asynchronously
+        '''[summary]
 
-        Subclasses must override this method.
-
-        This method shall yield (task, result) tuples.
+        [description]
         '''
-        raise NotImplementedError("Worker subclasses must implement "
-                                  "_perform_tasks() method.")
-
-    async def perform_tasks(self, tasks):
-        '''Worker starts performing tasks asynchronously
-        '''
-        self.tasks = tasks
-        async for task, result in self._perform_tasks():
-            yield (task, result)
+        LGR.todo("implement ProcessWorker._perform_task()!")

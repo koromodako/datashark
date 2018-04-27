@@ -27,6 +27,7 @@
 # =============================================================================
 from time import time
 from enum import Enum
+from uuid import uuid4
 from core.hash import Hash
 from helper.wrapper import lazy
 from helper.exception import InvalidPluginTypeException
@@ -64,6 +65,7 @@ class Task:
             plugin {Plugin} -- [description]
             container {Container} -- [description]
         '''
+        self.uuid = uuid4()
         self.category = category
         self.plugin = plugin
         self.container = container
