@@ -30,7 +30,7 @@ from core.orchestration.worker import Worker
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, __name__)
+LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -39,7 +39,7 @@ class ProcessWorker(Worker):
 
     Represents a worker executing locally in a separate process
     '''
-        async def initialize(self):
+    async def initialize(self):
         '''Performs initialization of the worker if needed
 
         Subclasses must override this method.

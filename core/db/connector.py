@@ -25,55 +25,49 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from core.plugin.plugin import Plugin
+from core.plugin.plugin import PluginInstance, Plugin
 from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, __name__)
+LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class DatabaseConnector(Plugin):
+class DatabaseConnector(PluginInstance):
     '''DatabaseConnector class
 
     Represents a generic connection with a database. It defines an interface.
     '''
-    def __init__(self, name):
-        '''[summary]
-
-        [description]
+    def __init__(self, conf, name):
+        '''Constructs the object
 
         Arguments:
-            name {[type]} -- [description]
+            conf {Configuration} -- [description]
+            name {str} -- [description]
         '''
-        super().__init__(Plugin.Type.DB_CONNECTOR, name)
+        super().__init__(Plugin.Category.DB_CONNECTOR, conf, name)
 
     def __str__(self):
+        '''String representation of the object
+        '''
         return "DatabaseConnector(name={})".format(self.name)
 
     async def connect(self):
-        '''[summary]
-
-        [description]
-
-        Returns:
-            {bool} - True if conection succeeded, False otherwise
+        '''Connects the program to the database
         '''
-        return await self._instance.connect()
+        raise NotImplementedError("DatabaseConnector subclasses must implement"
+                                  " connect() method.")
 
     async def disconnect(self):
         '''Disconnects the program from database closing all underlying
         sessions if any.
-
-        [description]
         '''
-        return await self._instance.disconnect()
+        raise NotImplementedError("DatabaseConnector subclasses must implement"
+                                  " disconnect() method.")
 
     async def persist(self, objects):
-        '''[summary]
-
-        [description]
+        '''Persists an object into the database
 
         Arguments:
             objects {DatabaseObject} -- Dict or list of dicts representing
@@ -82,12 +76,11 @@ class DatabaseConnector(Plugin):
         Returns:
             {bool} - True if persitence succeeded, False otherwise
         '''
-        return await self._instance.persit(objects)
+        raise NotImplementedError("DatabaseConnector subclasses must implement"
+                                  " persist() method.")
 
     async def retrieve(self, query):
-        '''[summary]
-
-        [description]
+        '''Retrieves an object from the database
 
         Arguments:
             query {dict} -- Dict representation of a query which can be
@@ -96,12 +89,11 @@ class DatabaseConnector(Plugin):
         Returns:
             {list} - list of dicts being retrieved objects
         '''
-        return await self._instance.retrieve(query)
+        raise NotImplementedError("DatabaseConnector subclasses must implement"
+                                  " retrieve() method.")
 
     async def delete(self, query):
-        '''[summary]
-
-        [description]
+        '''Deletes an object in the database
 
         Arguments:
             query {dict} -- Dict representation of a query which can be
@@ -110,4 +102,5 @@ class DatabaseConnector(Plugin):
         Returns:
             {int} - Number of objects deleted.
         '''
-        return await self._instance.delete(query)
+        raise NotImplementedError("DatabaseConnector subclasses must implement"
+                                  " delete() method.")

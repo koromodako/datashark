@@ -34,7 +34,7 @@ from core.orchestration.cluster_worker import ClusterWorker
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, __name__)
+LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -72,9 +72,9 @@ class WorkerPool:
 
         self.workers = []
 
-        if self.type == Worker.Type.PROCESS:
+        if self.type == Worker.Category.PROCESS:
             worker_cls = ProcessWorker
-        elif self.type == Worker.Type.CLUSTER:
+        elif self.type == Worker.Category.CLUSTER:
             worker_cls = ClusterWorker
 
         for k in range(self.size):

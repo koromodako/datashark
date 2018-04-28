@@ -26,13 +26,14 @@
 #  IMPORTS
 # =============================================================================
 from munch import Munch
+from pathlib import Path
 from ruamel.yaml import safe_load, safe_dump
 from helper.wrapper import lazy
 from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, __name__)
+LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -46,6 +47,17 @@ class Configuration(Munch):
         Returns:
             Configuration or None -- [description]
         '''
+        if path is None:
+            # try multiple path in the following order
+            paths = [
+                Path().joinpath('datashark.conf'),
+                Path.home().joinpath('datashark.conf'),
+                Path('/etc/datashark/datashark.conf')
+            ]
+            for p in paths:
+                if p.is_file():
+                    path = p
+
         try:
 
             with path.open('r') as f:

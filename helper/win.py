@@ -28,11 +28,9 @@
 from os import name
 from helper.exception import LinuxSpecificFeatureException
 from helper.exception import MSWindowsSpecificFeatureException
-from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, __name__)
 WINDOWS = (name == 'nt')
 # =============================================================================
 #  FUNCTIONS
@@ -46,6 +44,4 @@ def assert_ms_windows(raise_exc=True, invert=False):
         raise MSWindowsSpecificFeatureException("This feature can only be "
                                                 "used on Windows.")
 
-    assertion_result = (not WINDOWS) if invert else WINDOWS
-    LGR.debug('assert_ms_windows(): {}'.format(assertion_result))
-    return assertion_result
+    return (not WINDOWS) if invert else WINDOWS

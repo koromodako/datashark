@@ -25,13 +25,14 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from enum import Enum
 from asyncio import get_event_loop
 from helper.logging.logger import Logger
 from core.orchestration.task import Task
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, __name__)
+LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -41,8 +42,8 @@ class Worker:
     Receives tasks from Orchestrator and perform them until completion or an
     internal exception is raised and returns the result.
     '''
-    class Type(Enum):
-        '''Worker's types enumeration
+    class Category(Enum):
+        '''Worker's category enumeration
 
         Variables:
             CLUSTER {str} -- [description]

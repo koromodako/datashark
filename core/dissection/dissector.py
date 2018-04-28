@@ -25,35 +25,35 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from core.plugin.plugin import Plugin
+from core.plugin.plugin import PluginInstance, Plugin
 from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, __name__)
+LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
-
-class Dissector(Plugin):
+class Dissector(PluginInstance):
     '''Dissector
 
     Represents a dissector, i.e. an object able to extract containers from a
     parent container. This object will use one to several parsers to extract
     all "sub-containers" contained by given container.
     '''
-    def __init__(self, name):
+    def __init__(self, conf, name):
         '''Constructs an object
 
         Arguments:
             name {str} -- Dissector unique name
         '''
-        super().__init__(Plugin.Type.DISSECTOR, name)
+        super().__init__(Plugin.Category.DISSECTOR, conf, name)
 
     def supported_mime_types(self):
         '''Gives a list of MIME types which can be handled by this dissector
         '''
-        return self._instance.supported_mime_types()
+        raise NotImplementedError("Dissector subclasses must implement "
+                                  "supported_mime_types() method.")
 
     def can_dissect(self, container):
         '''Checks if dissection can be performed
@@ -65,7 +65,8 @@ class Dissector(Plugin):
             container {Container} -- Container to check for dissection
                                      compatibility
         '''
-        return self._instance.can_dissect(container)
+        raise NotImplementedError("Dissector subclasses must implement "
+                                  "can_dissect() method.")
 
     async def containers(self, container):
         '''Extract containers from given container
@@ -75,5 +76,5 @@ class Dissector(Plugin):
         Arguments:
             container {Container} -- Container to dissect
         '''
-        async for container in self._instance.containers(container):
-            yield container
+        raise NotImplementedError("Dissector subclasses must implement "
+                                  "containers() method.")

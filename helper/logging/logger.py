@@ -37,8 +37,8 @@ class Logger:
     '''Wrapper around logging.Logger hiding underlying logger interface and
     adding useful things
     '''
-    class Type(Enum):
-        '''Logger's types enumeration
+    class Category(Enum):
+        '''Logger's category enumeration
 
         Variables:
             CORE {str} -- [description]
@@ -67,6 +67,8 @@ class Logger:
 
         Logger.ROOT_LOGGER.setLevel(DEBUG)
 
+        log_dir.mkdir(mode=0o755, parents=True, exist_ok=True)
+
         error_hdlr = RotatingFileHandler(str(log_dir.joinpath('datashark.error.log')),
                                          maxBytes=10*1024*1024,
                                          backupCount=5)
@@ -83,22 +85,22 @@ class Logger:
 
         if not Logger.OPT_SILENT:
             console_hdlr = StreamHandler(stream=stderr)
-            console_hdlr.setFormatter(ColoredFormatter(fmt=Logger.CONSOLE_FMT))
+            console_hdlr.setFormatter(ColoringFormatter(fmt=Logger.CONSOLE_FMT))
             Logger.ROOT_LOGGER.addHandler(console_hdlr)
 
-    def __init__(self, type, name):
+    def __init__(self, category, name):
         '''[summary]
 
         [description]
 
         Arguments:
-            type {[type]} -- [description]
+            category {[type]} -- [description]
             name {[type]} -- [description]
         '''
         if '.' in name:
             name = name.split('.')[-1]
 
-        self.name = 'datashark.{}.{}'.format(type, name)
+        self.name = 'datashark.{}.{}'.format(category, name)
         self._logger = getLogger(self.name)
 
     def debug(self, msg, *args, **kwargs):

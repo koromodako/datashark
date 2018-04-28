@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: file_type_guesser.py
-#     date: 2018-04-03
+#     file: fs_connector.py
+#     date: 2018-04-28
 #   author: paul.dautry
 #  purpose:
 #
@@ -25,48 +25,42 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from magic import Magic
-from helper.logging.logger import Logger
-# =============================================================================
-#  GLOBALS
-# =============================================================================
-LGR = Logger(Logger.Category.CORE, __name__)
+from core.db.connector import DatabaseConnector
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class FileTypeGuesser:
-    '''Guess file MIME type from content using a magic file'''
-    def __init__(self, magic_file=None):
-        '''[summary]
+class FSConnector(DatabaseConnector):
+    '''FSConnector
 
-        [description]
-
-        Keyword Arguments:
-            magic_file {str} -- Magic database to use (default: {None})
+    Connects FS-based database
+    '''
+    def __init__(self, conf):
+        '''Constructs the object
         '''
-        self.magic_file = magic_file
+        super().__init__(conf, 'fs')
 
-    def mime_text(self, path):
-        '''Returns a textual description of the MIME type.
-
-        Arguments:
-            path {Path} -- Path of the file to analyze
+    async def connect(self):
+        '''This is a nop.
         '''
-        if not path.is_file():
-            return None
+        pass
 
-        magic = Magic(magic_file=magic_file)
-        return magic.from_file(str(path))
-
-    def mime_type(self, path):
-        '''Returns a MIME description of the MIME type.
-
-        Arguments:
-            path {Path} -- Path of the file to analyze
+    async def disconnect(self):
+        '''This is a nop.
         '''
-        if not path.is_file():
-            return None
+        pass
 
-        magic = Magic(magic_file=self.magic_file, mime=True)
-        return magic.from_file(str(path))
+    async def persist(self, objects):
+        '''This is a nop.
+        '''
+        pass
 
+    async def retrieve(self, query):
+        '''Calling this method is not allowed.
+        '''
+        raise RuntimeError("Calling retrieve on a DevNullConnector is not "
+                           "allowed.")
+
+    async def delete(self, query):
+        '''This is a nop.
+        '''
+        pass

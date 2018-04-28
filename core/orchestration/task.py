@@ -28,17 +28,16 @@
 from time import time
 from enum import Enum
 from uuid import uuid4
-from core.hash import Hash
-from helper.wrapper import lazy
+from core.hash.hash import Hash
 from helper.exception import InvalidPluginTypeException
 from helper.logging.logger import Logger
-from core.dissection.examiner import Examiner
 from core.dissection.dissector import Dissector
+from core.examination.examiner import Examiner
 from core.plugin.plugin_selector import PluginSelector
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, __name__)
+LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -101,7 +100,6 @@ class Task:
                                                               self.priority)
 
     @property
-    @lazy
     def execution_time(self):
         return self.stop_time - self.start_time
 

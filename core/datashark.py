@@ -37,7 +37,7 @@ from core.orchestration.orchestrator import Orchestrator
 # =============================================================================
 #  GLOBALS / CONFIG
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, __name__)
+LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -70,7 +70,7 @@ class Datashark:
         conf = {
             'hash_db': hash_db,
             'max_workers': 4,
-            'worker_type': Worker.Type.PROCESS,
+            'worker_type': Worker.Category.PROCESS,
             'whitelist_db': whitelist_db,
             'blacklist_db': blacklist_db,
             'dissection_db': dissection_db,

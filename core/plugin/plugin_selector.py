@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: examiner.py
-#     date: 2018-04-24
+#     file: plugin_selector.py
+#     date: 2018-04-28
 #   author: paul.dautry
 #  purpose:
 #
@@ -25,7 +25,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from core.plugin.plugin import PluginInstance, Plugin
+from plugins.plugins import PLUGINS
 from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
@@ -34,47 +34,19 @@ LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class Examiner(PluginInstance):
-    '''Examiner class
+class PluginSelector:
 
-    Represents an object able to perform consistency/compliance checks on
-    several elements of a container. These elements includes the following:
-        * compliance with file format specifications, if there is any
-        * consistency of data in terms of security (ex: integrity of records
-          of a SQLite database or a Windows registry file)
-        * and other things specific to some formats
-    '''
-    def __init__(self, conf, name):
-        '''Constructs an object
+    @staticmethod
+    def select_examiners_for(container):
+        '''[summary]
+
+        [description]
 
         Arguments:
-            name {str} -- Examiner unique name
+            container {[type]} -- [description]
         '''
-        super().__init__(Plugin.Category.EXAMINER, conf, name)
+        LGR.todo("implement PluginSelector.select_examiners_for()!")
 
-    def supported_mime_types(self):
-        '''Gives a list of MIME types which can be handled by this examiner
-        '''
-        return self._instance.supported_mime_types()
-
-    def can_examine(self, container):
-        '''Checks if examination can be performed
-
-        Checks if underlying examiner instance is able to perform an
-        examination of this container.
-
-        Arguments:
-            container {Container} -- Container to check for examination
-                                     compatibility
-        '''
-        return self._instance.can_examine(container)
-
-    async def examine(self, container):
-        '''Examine a container
-
-        Performs the examination of the container.
-
-        Arguments:
-            container {Container} -- Container to examine
-        '''
-        return await self._instance.examine(container)
+    @staticmethod
+    def select_dissectors_for(container):
+        LGR.todo("implement PluginSelector.select_dissectors_for()!")

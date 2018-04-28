@@ -31,7 +31,7 @@ from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, __name__)
+LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -41,59 +41,56 @@ class Plugin:
     Interface for a generic Datashark plugin
     '''
 
-    class Type(Enum):
-        '''Plugin's types enumeration
+    class Category(Enum):
+        '''Plugin's category enumeration
         '''
         EXAMINER = 'examiner'
         DISSECTOR = 'dissector'
         DB_CONNECTOR = 'db_connector'
 
-    def __init__(self, type, name):
+    def __init__(self, category, instance_cls):
         '''Constructs a new instance
 
         Arguments:
-            type {Plugable.Type} -- Plugin's type
+            category {Plugable.Type} -- Plugin's category
             name {str} -- Plugin's name
         '''
-        super(Plugable, self).__init__()
-        self.type = type
-        self.name = name
-        self.slug = slugify(name)
-        self.logger = Logger(Logger.Type.PLUGIN, '{}.{}'.format(type, slug))
-        self._instance = None
+        self.category = category
+        self.name = instance_cls.__name__
+        self.instance_cls = instance_cls
 
     def __str__(self):
-        return "Plugin(type={},name={},slug={})".format(self.type,
-                                                        self.name,
-                                                        self.slug)
+        return "Plugin(category={},instance_cls={})".format(self.category,
+                                                        self.instance_cls)
 
-    @property
-    def initialized(self):
-        return (self._instance is not None)
-
-    async def init(self, gconf, pconf):
-        '''Initializes the plugin
+    async def instance(self, conf):
+        '''Plugin instance factory
 
         Datashark framework ensure that this operation is called and is
         the first operation called on a plugin instance.
 
         1. This method shall import all modules needed to initialize
-           self.instance.
-        2. This method shall initialize self.instance.
+           self._instance.
+        2. This method shall initialize self._instance.
 
         Arguments:
-            gconf {dict} -- Global configuration
-            pconf {dict} -- Plugin-specific configuration
+            conf {Configuration} -- Configuration
         '''
-        raise NotImplementedError("Plugin subclasses must implement init()")
+        return self.instance_cls(conf)
 
-    async def term(self):
-        '''Terminates the plugin
+class PluginInstance:
+    '''[summary]
+    '''
+    def __init__(self, category, conf, name):
+        '''Constructs the object
 
-        Datashark framework ensure that this operation is called and is
-        the last operation called on a plugin instance.
-
-        1. This method shall perform all cleaning operations relative to
-           self.instance.
+        Arguments:
+            category {Plugin.Category} -- [description]
+            conf {Configuration} -- [description]
+            name {str} -- [description]
         '''
-        raise NotImplementedError("Plugin subclasses must implement term()")
+        self.category = category
+        self.conf = conf
+        self.name = name
+        self.slug = slugify(name)
+        self.logger = Logger(Logger.Category.PLUGIN, '{}.{}'.format(category, slug))

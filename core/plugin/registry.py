@@ -25,11 +25,12 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from core.plugin.plugin import Plugin
 from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, __name__)
+LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -49,37 +50,55 @@ class Registry:
         super(Registry, self).__init__()
         self._plugins = {}
 
-    def register(self, plugin):
+    def register(self, category, instance_cls):
         '''Registers a plugin
 
         Arguments:
             plugin {Plugin} -- Plugin instance to be registered
         '''
-        if plugin.type not in self._plugins:
-            self._plugins[plugin.type] = {}
-        self._plugins[plugin.type][plugin.slug] = plugin
+        plugin = Plugin(category, instance_cls)
 
-    def plugins(self, type=None):
+        if Plugin.Category not in self._plugins:
+            self._plugins[plugin.category] = {}
+
+        # register an instance of the plugin
+        self._plugins[plugin.category][plugin.name] = plugin
+
+    def plugins(self, type=None, name=None):
         '''[summary]
 
         Arguments:
-            type {Plugin.Type} -- [description]
+            type {Plugin.Category} -- [description]
 
         Returns:
             dict or None -- [description]
         '''
-        if not type:
+        if type is None:
             return self._plugins
-        return self._plugins.get(type)
 
-    def plugin(self, type, slug):
+        plugins = self._plugins.get(type)
+
+        if name is None:
+            return plugins
+
+        if plugins is None:
+            return None
+
+        return plugins.get(name)
+
+    def plugin_instance(self, type, name, conf):
         '''Returns a plugin
 
         Arguments:
-            type {Plugin.Type} -- [description]
-            slug {str} -- [description]
+            type {Plugin.Category} -- [description]
+            name {str} -- [description]
 
         Returns:
             Plugin or None -- [description]
         '''
-        return self._plugins.get(type, {}).get(slug)
+        plugin = self._plugins.get(type, {}).get(name)
+
+        if plugin is None:
+            return None
+
+        return plugin.instance(conf)
