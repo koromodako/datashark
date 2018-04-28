@@ -34,13 +34,27 @@ from helper.exception import InvalidPluginTypeException
 from helper.logging.logger import Logger
 from core.dissection.examiner import Examiner
 from core.dissection.dissector import Dissector
+from core.plugin.plugin_selector import PluginSelector
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, 'task')
+LGR = Logger(Logger.Type.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
+class TaskResult:
+    '''Represents a task result
+    '''
+    def __init__(self, task, data):
+        '''Constructs the object
+
+        Arguments:
+            task {Task} -- [description]
+            data {Typing.Any} -- [description]
+        '''
+        self.task = task
+        self.data = data
+
 class Task:
     '''[summary]
 
@@ -59,6 +73,8 @@ class Task:
         HASHING = 'hashing'
         DISSECTION = 'dissection'
         EXAMINATION = 'examination'
+        EXAMINER_SELECTION = 'examiner_selection'
+        DISSECTOR_SELECTION = 'dissector_selection'
 
     def __init__(self, category, plugin, container):
         '''[summary]
@@ -74,9 +90,15 @@ class Task:
         self.category = category
         self.plugin = plugin
         self.container = container
+        self.priority = 0 if category == Task.Category.ABORT else 10
         self.start_time = None
         self.stop_time = None
         self.succeeded = None
+
+    def __str__(self):
+        return "Task(uuid={},category={},priority={})".format(self.uuid,
+                                                              self.category,
+                                                              self.priority)
 
     @property
     @lazy
@@ -126,7 +148,31 @@ class Task:
             raise UninitializedPluginException("Uninitialized Examiner given "
                                                "to task.")
 
-        return await self.plugin.examine()
+        return await self.plugin.examine(self.container)
+
+    async def perform_examiner_selection(self):
+        if not isinstance(self.plugin, PluginSelector):
+            raise InvalidPluginTypeException("Examiner selection task "
+                                             "received an invalid plugin: "
+                                             "{}".format(self.plugin))
+
+        ## Note:
+        ##    no need to check if this plugin is initialized as it is not
+        ##    really a plugin
+
+        return self.plugin.select_examiners_for(self.container)
+
+    async def perform_dissector_selection(self):
+        if not isinstance(self.plugin, PluginSelector):
+            raise InvalidPluginTypeException("Dissector selection task "
+                                             "received an invalid plugin: "
+                                             "{}".format(self.plugin))
+
+        ## Note:
+        ##    no need to check if this plugin is initialized as it is not
+        ##    really a plugin
+
+        return self.plugin.select_dissectors_for(self.container)
 
     async def perform(self):
         '''Generator of results
@@ -138,14 +184,20 @@ class Task:
             self.start_time = time()
 
             if self.category == Task.Category.HASHING:
-                yield await self.perform_hashing()
+                yield TaskResult(self, await self.perform_hashing())
 
             elif self.category == Task.Category.DISSECTION:
-                async for container in self.perform_dissection()
-                    yield container
+                async for container in self.perform_dissection():
+                    yield TaskResult(self, container)
 
             elif self.category == Task.Category.EXAMINATION:
-                yield await self.perform_examination()
+                yield TaskResult(self, await self.perform_examination())
+
+            elif self.category == Task.Category.EXAMINER_SELECTION:
+                yield TaskResult(self, await self.perform_examiner_selection())
+
+            elif self.category == Task.Category.DISSECTOR_SELECTION:
+                yield TaskResult(self, await self.perform_dissector_selection())
 
             self.succeeded = True
 

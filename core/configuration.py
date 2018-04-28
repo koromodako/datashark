@@ -25,67 +25,70 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from munch import munchify
+from munch import Munch
 from ruamel.yaml import safe_load, safe_dump
 from helper.wrapper import lazy
+from helper.logging.logger import Logger
+# =============================================================================
+#  GLOBALS
+# =============================================================================
+LGR = Logger(Logger.Type.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class Configuration:
-    '''[summary]
-
-    [description]
+class Configuration(Munch):
+    '''Represents a configuration set which can be saved to disk.
     '''
-    def __init__(self, path):
+    @classmethod
+    def load(cls, path):
+        '''Loads a configuration from the disk
+
+        Returns:
+            Configuration or None -- [description]
+        '''
+        try:
+
+            with path.open('r') as f:
+                conf = safe_load(f)
+                conf = cls.fromDict(conf)
+                conf.path = path
+            return conf
+
+        except Exception as e:
+            LGR.exception("An exception occured while loading a configuration "
+                          "from a YAML file. Details below.")
+            return None
+
+    def save(self):
+        '''Writes the configuration to the disk
+
+        [description]
+
+        Returns:
+            bool -- True if succeeds, False otherwise
+        '''
+        if 'path' not in self.keys():
+            LGR.error("You must give a valid path to your configuration before"
+                      " using save() method.")
+            return False
+
+        try:
+            with self.path.open('w') as f:
+                safe_dump(f, self.toDict())
+            return True
+        except Exception as e:
+            LGR.exception("An exception occured while saving a configuration "
+                          "to a YAML file. Details below.")
+            return False
+
+    def save_as(self, path):
         '''[summary]
 
         Arguments:
-            path {Path} -- [description]
+            path {[type]} -- [description]
+
+        Returns:
+            bool -- True if succeeds, False otherwise
         '''
         self.path = path
-        self._conf = None
-
-    @property
-    @lazy
-    def conf(self):
-        '''[summary]
-
-        [description]
-
-        Decorators:
-            lazy
-
-        Returns:
-            [type] -- [description]
-        '''
-        return munchify(self._conf)
-
-    def load(self):
-        '''[summary]
-
-        [description]
-
-        Returns:
-            bool -- [description]
-        '''
-        try:
-            with self.path.open('r') as f:
-                self._conf = safe_load(f)
-            return True
-        except Exception as e:
-            return False
-
-    def save(self):
-        '''[summary]
-
-        [description]
-
-        Returns:
-            bool -- [description]
-        '''
-        try:
-            with self.path.open('w') as f:
-                safe_dump(f, self._conf)
-            return True
-        except Exception as e:
-            return False
+        return self.save()

@@ -26,6 +26,11 @@
 #  IMPORTS
 # =============================================================================
 from functools import wraps
+from helper.logging.logger import Logger
+# =============================================================================
+#  GLOBALS
+# =============================================================================
+LGR = Logger(Logger.Type.CORE, __name__)
 # =============================================================================
 #  FUNCTIONS
 # =============================================================================
@@ -39,6 +44,22 @@ def lazy():
                 setattr(self, member_name, f(self, *args, **kwds))
 
             return getattr(self, member_name)
+
+        return wrapped
+
+    return wrapper
+
+def trace_with(logger):
+    def wrapper(f):
+        @wraps(f)
+        def wrapped(self, *args, **kwargs):
+            f_call = "{}(args={},kwargs={})".format(f.__name__, args, kwargs)
+
+            logger.debug("[IN]  {}".format(f_call))
+            ret = f(self, *args, **kwargs)
+            logger.debug("[OUT] {} => {}".format(f_call, ret))
+
+            return ret
 
         return wrapped
 

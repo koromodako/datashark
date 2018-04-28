@@ -95,6 +95,9 @@ class Logger:
             type {[type]} -- [description]
             name {[type]} -- [description]
         '''
+        if '.' in name:
+            name = name.split('.')[-1]
+
         self.name = 'datashark.{}.{}'.format(type, name)
         self._logger = getLogger(self.name)
 

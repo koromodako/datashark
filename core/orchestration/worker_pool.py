@@ -34,7 +34,7 @@ from core.orchestration.cluster_worker import ClusterWorker
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, 'worker_pool')
+LGR = Logger(Logger.Type.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -43,17 +43,7 @@ class WorkerPool:
 
     Represents a pool of workers.
     '''
-    class Type(Enum):
-        '''WorkerPool's types enumeration
-
-        Variables:
-            CLUSTER {str} -- [description]
-            PROCESS {str} -- [description]
-        '''
-        CLUSTER = 'cluster'
-        PROCESS = 'process'
-
-    def __init__(self, type, max_workers, tpq_in, tq_out, configuration):
+    def __init__(self, type, tpq_in, tq_out, conf):
         '''Constructs the object
 
         Arguments:
@@ -68,8 +58,8 @@ class WorkerPool:
         self.tpq_in = tpq_in
         self.tq_out = tq_out
         self.workers = []
-        self.executor = ProcessPoolExecutor(max_workers=max_workers)
-        self.configuration = configuration
+        self.executor = ProcessPoolExecutor(max_workers=conf.max_workers)
+        self.conf = conf
 
     async def allocate(self):
         '''Allocates workers to be used by the pool
@@ -82,9 +72,9 @@ class WorkerPool:
 
         self.workers = []
 
-        if self.type == WorkerPool.Type.PROCESS:
+        if self.type == Worker.Type.PROCESS:
             worker_cls = ProcessWorker
-        elif self.type == WorkerPool.Type.CLUSTER:
+        elif self.type == Worker.Type.CLUSTER:
             worker_cls = ClusterWorker
 
         for k in range(self.size):
@@ -145,6 +135,6 @@ class WorkerPool:
         '''Gives worker the order to start consuming tasks
         '''
         LGR.debug("Starting workers...")
-        workers_group = gather([worker.do_work() for worker in self.workers])
+        worker_group = gather([worker.do_work() for worker in self.workers])
         LGR.debug("Done starting workers.")
-        return workers_group
+        return worker_group

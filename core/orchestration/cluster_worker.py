@@ -30,14 +30,14 @@ from core.orchestration.worker import Worker
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, 'cluster_worker')
+LGR = Logger(Logger.Type.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
 class ClusterWorker(Worker):
-    '''[summary]
+    '''ClusterWorker class
 
-    [description]
+    Represents a worker distributed on a cluster of servers
     '''
     async def initialize(self):
         '''Performs initialization of the worker if needed
@@ -66,6 +66,9 @@ class ClusterWorker(Worker):
 
         Subclasses must override this method.
 
-        This method shall yield (task, result) tuples.
+        This method shall:
+            1. perform actual task work
+            2. put (task,result) tuples in self.tq_out queue for further
+               processing
         '''
         LGR.todo("implement ClusterWorker._perform_task()!")

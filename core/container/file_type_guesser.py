@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: workspace.py
-#     date: 2018-04-27
+#     file: file_type_guesser.py
+#     date: 2018-04-03
 #   author: paul.dautry
 #  purpose:
 #
@@ -25,34 +25,48 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from uuid import uuid4
-from pathlib import Path
-from slugify import slugify
-from datetime import datetime
+from magic import Magic
 from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, 'workspace')
+LGR = Logger(Logger.Type.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class Workspace:
-    '''Represents a Datashark workspace
-    '''
+class FileTypeGuesser:
+    '''Guess file MIME type from content using a magic file'''
+    def __init__(self, magic_file=None):
+        '''[summary]
 
-    def __init__(self, name, log_dir, tmp_dir, dat_dir):
-        '''Constructs an object
+        [description]
+
+        Keyword Arguments:
+            magic_file {str} -- Magic database to use (default: {None})
+        '''
+        self.magic_file = magic_file
+
+    def mime_text(self, path):
+        '''Returns a textual description of the MIME type.
 
         Arguments:
-            log_dir {Path} -- [description]
-            tmp_dir {Path} -- [description]
-            dat_dir {Path} -- [description]
+            path {Path} -- Path of the file to analyze
         '''
-        self.name = name
-        self.slug = slugify(name)
-        self.uuid = uuid4()
-        self.timestamp = datetime.now().isoformat()
-        self.log_dir = log_dir if isinstance(log_dir, Path) else Path(log_dir)
-        self.tmp_dir = tmp_dir if isinstance(tmp_dir, Path) else Path(tmp_dir)
-        self.dat_dir = dat_dir if isinstance(dat_dir, Path) else Path(dat_dir)
+        if not path.is_file():
+            return None
+
+        magic = Magic(magic_file=magic_file)
+        return magic.from_file(str(path))
+
+    def mime_type(self, path):
+        '''Returns a MIME description of the MIME type.
+
+        Arguments:
+            path {Path} -- Path of the file to analyze
+        '''
+        if not path.is_file():
+            return None
+
+        magic = Magic(magic_file=self.magic_file, mime=True)
+        return magic.from_file(str(path))
+

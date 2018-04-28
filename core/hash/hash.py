@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: dissection_db.py
-#     date: 2018-04-03
+#     file: hash.py
+#     date: 2018-04-27
 #   author: paul.dautry
 #  purpose:
 #
@@ -25,21 +25,42 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from core.db.database import Database
+from core.db.object import DatabaseObject
+from helper.logging.logger import Logger
+# =============================================================================
+#  GLOBALS
+# =============================================================================
+LGR = Logger(Logger.Type.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class DissectionDatabase(Database):
-    '''[summary]
+class Hash(DatabaseObject):
+    '''Represents a hash result of a container
 
-    [description]
+    Stores multiple hash values for a single container.
     '''
-    def __init__(self, connector):
-        '''[summary]
+    def __init__(self):
+        super().__init__()
 
-        [description]
+    def from_db(self, doc):
+        '''Loads a document (dict) which is returned by any DatabaseConnector
+
+        Loads all persistent properties of an object from a dict.
 
         Arguments:
-            connector {DatabaseConnector} -- [description]
+            doc {dict} -- [description]
         '''
-        super().__init__(connector)
+        raise NotImplementedError("DatabaseObject subclasses must implement "
+                                  "to_db() method.")
+
+
+    def to_db(self):
+        '''Creates a document (dict) which can be used by any DatabaseConnector
+
+        Creates a dict which contains all persistent properties of an object.
+
+        Returns:
+            {dict} -- [description]
+        '''
+        raise NotImplementedError("DatabaseObject subclasses must implement "
+                                  "to_db() method.")

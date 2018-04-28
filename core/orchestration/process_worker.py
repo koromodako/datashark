@@ -30,14 +30,14 @@ from core.orchestration.worker import Worker
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, 'process_worker')
+LGR = Logger(Logger.Type.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
 class ProcessWorker(Worker):
-    '''[summary]
+    '''ProcessWorker class
 
-    [description]
+    Represents a worker executing locally in a separate process
     '''
         async def initialize(self):
         '''Performs initialization of the worker if needed
@@ -48,7 +48,8 @@ class ProcessWorker(Worker):
             1. set self.terminated to False
             2. return True on success, False otherwise
         '''
-        LGR.todo("implement ProcessWorker.initialize()!")
+        self.terminated = False
+        return True
 
     async def terminate(self):
         '''Performs cleanup of the worker if needed
@@ -59,13 +60,18 @@ class ProcessWorker(Worker):
             1. set self.terminated to True
             2. return True on success, False otherwise
         '''
-        LGR.todo("implement ProcessWorker.terminate()!")
+        self.terminated = True
+        return True
 
     async def _perform_task(self, task):
         '''Performs task asynchronously
 
         Subclasses must override this method.
 
-        This method shall yield (task, result) tuples.
+        This method shall:
+            1. perform actual task work
+            2. put (task,result) tuples in self.tq_out queue for further
+               processing
         '''
-        LGR.todo("implement ProcessWorker._perform_task()!")
+        async for result in task.perform():
+            await self.tq_out.put(result)

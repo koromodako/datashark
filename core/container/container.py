@@ -29,7 +29,12 @@ from uuid import UUID, uuid4
 from pathlib import Path
 from slugify import slugify
 from core.db.object import DatabaseObject
-from core.file_type_guesser import FileTypeGuesser
+from helper.logging.logger import Logger
+from core.container.file_type_guesser import FileTypeGuesser
+# =============================================================================
+#  CLASSES
+# =============================================================================
+LGR = Logger(Logger.Type.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -39,10 +44,10 @@ class Container(DatabaseObject):
     [description]
     '''
     def __init__(self,
-                 parent=None,
-                 path=None,
-                 original_path=None,
-                 name=None,
+                 name='',
+                 path=Path(),
+                 parent=UUID(int=0),
+                 original_path=Path(),
                  magic_file=None):
         '''[summary]
 

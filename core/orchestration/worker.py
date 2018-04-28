@@ -31,7 +31,7 @@ from core.orchestration.task import Task
 # =============================================================================
 #  GLOBALS
 # =============================================================================
-LGR = Logger(Logger.Type.CORE, 'worker')
+LGR = Logger(Logger.Type.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
@@ -41,6 +41,16 @@ class Worker:
     Receives tasks from Orchestrator and perform them until completion or an
     internal exception is raised and returns the result.
     '''
+    class Type(Enum):
+        '''Worker's types enumeration
+
+        Variables:
+            CLUSTER {str} -- [description]
+            PROCESS {str} -- [description]
+        '''
+        CLUSTER = 'cluster'
+        PROCESS = 'process'
+
     def __init__(self, num, tpq_in, tq_out, executor, configuration):
         '''Constructs the object
         '''
@@ -80,7 +90,10 @@ class Worker:
 
         Subclasses must override this method.
 
-        This method shall yield (task, result) tuples.
+        This method shall:
+            1. perform actual task work
+            2. put (task,result) tuples in self.tq_out queue for further
+               processing
         '''
         raise NotImplementedError("Worker subclasses must implement "
                                   "_perform_task() method.")
@@ -111,3 +124,4 @@ class Worker:
             self.tpq_in.task_done()
 
         LGR.debug("Worker n°{}: leaving working loop.".format(self.num))
+
