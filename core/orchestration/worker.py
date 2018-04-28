@@ -25,7 +25,9 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from asyncio import get_event_loop
 from helper.logging.logger import Logger
+from core.orchestration.task import Task
 # =============================================================================
 #  GLOBALS
 # =============================================================================
@@ -39,26 +41,73 @@ class Worker:
     Receives tasks from Orchestrator and perform them until completion or an
     internal exception is raised and returns the result.
     '''
-    def __init__(self, num, configuration=None):
+    def __init__(self, num, tpq_in, tq_out, executor, configuration):
         '''Constructs the object
         '''
         self.num = num
-        self.tasks = None
+        self.tpq_in = tpq_in
+        self.tq_out = tq_out
+        self.executor = executor
         self.configuration = configuration
+        self.terminated = None
 
-    async def _perform_tasks(self):
-        '''Worker starts performing tasks asynchronously
+    async def initialize(self):
+        '''Performs initialization of the worker if needed
+
+        Subclasses must override this method.
+
+        This method shall:
+            1. set self.terminated to False
+            2. return True on success, False otherwise
+        '''
+        raise NotImplementedError("Worker subclasses must implement "
+                                  "initialize() method.")
+
+    async def terminate(self):
+        '''Performs cleanup of the worker if needed
+
+        Subclasses must override this method.
+
+        This method shall:
+            1. set self.terminated to True
+            2. return True on success, False otherwise
+        '''
+        raise NotImplementedError("Worker subclasses must implement "
+                                  "terminate() method.")
+
+    async def _perform_task(self, task):
+        '''Performs task asynchronously
 
         Subclasses must override this method.
 
         This method shall yield (task, result) tuples.
         '''
         raise NotImplementedError("Worker subclasses must implement "
-                                  "_perform_tasks() method.")
+                                  "_perform_task() method.")
 
-    async def perform_tasks(self, tasks):
-        '''Worker starts performing tasks asynchronously
+    async def do_work(self):
+        '''Worker starts consuming tasks asynchronously
         '''
-        self.tasks = tasks
-        async for task, result in self._perform_tasks():
-            yield (task, result)
+        LGR.debug("Worker n°{}: entering working loop...".format(self.num))
+        while True:
+            task = await self.tpq_in.get()
+
+            if self.terminated:
+                LGR.debug("Worker n°{}: terminated.".format(self.num))
+                break
+
+            if task is None:
+                LGR.debug("Worker n°{}: no more task to process.".format(self.num))
+                break
+
+            if task.category == Task.Category.ABORT:
+                LGR.debug("Worker n°{}: aborting.".format(self.num))
+                break
+
+            loop = get_event_loop()
+            await loop.run_in_executor(self.executor, self._perform_task, task)
+
+            LGR.debug("Worker n°{}: task completed.".format(self.num))
+            self.tpq_in.task_done()
+
+        LGR.debug("Worker n°{}: leaving working loop.".format(self.num))

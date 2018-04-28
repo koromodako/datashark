@@ -49,8 +49,13 @@ class Task:
     class Category(Enum):
         '''[summary]
 
-        [description]
+        Variables:
+            ABORT {str} -- Tells the worker to end its execution
+            HASHING {str} -- Hashing task
+            DISSECTION {str} -- Dissection task
+            EXAMINATION {str} -- Examination task
         '''
+        ABORT = 'abort'
         HASHING = 'hashing'
         DISSECTION = 'dissection'
         EXAMINATION = 'examination'

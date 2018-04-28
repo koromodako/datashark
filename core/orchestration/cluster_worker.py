@@ -39,9 +39,33 @@ class ClusterWorker(Worker):
 
     [description]
     '''
-    async def _perform_tasks(self):
-        '''[summary]
+    async def initialize(self):
+        '''Performs initialization of the worker if needed
 
-        [description]
+        Subclasses must override this method.
+
+        This method shall:
+            1. set self.terminated to False
+            2. return True on success, False otherwise
         '''
-        LGR.todo("implement ClusterWorker._perform_tasks()!")
+        LGR.todo("implement ClusterWorker.initialize()!")
+
+    async def terminate(self):
+        '''Performs cleanup of the worker if needed
+
+        Subclasses must override this method.
+
+        This method shall:
+            1. set self.terminated to True
+            2. return True on success, False otherwise
+        '''
+        LGR.todo("implement ClusterWorker.terminate()!")
+
+    async def _perform_task(self, task):
+        '''Performs task asynchronously
+
+        Subclasses must override this method.
+
+        This method shall yield (task, result) tuples.
+        '''
+        LGR.todo("implement ClusterWorker._perform_task()!")
