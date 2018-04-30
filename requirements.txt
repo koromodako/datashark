@@ -1,6 +1,7 @@
 munch
-slugify
-pycrypto
+aioredis
 termcolor
 ruamel.yaml
 python-magic
+pycryptodome
+python-slugify

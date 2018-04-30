@@ -25,6 +25,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from helper.crypto import Crypto
 from core.db.object import DatabaseObject
 from helper.logging.logger import Logger
 # =============================================================================
@@ -39,22 +40,27 @@ class Hash(DatabaseObject):
 
     Stores multiple hash values for a single container.
     '''
-    def __init__(self):
-        super().__init__()
+    INDEX = 'hash'
+    FIELDS = [
+        ('md5', DatabaseObject.FieldType.STRING),
+        ('sha1', DatabaseObject.FieldType.STRING),
+        ('sha_256', DatabaseObject.FieldType.STRING),
+        ('sha3_256', DatabaseObject.FieldType.STRING),
+    ]
 
-    def from_db(self, doc):
-        '''Loads a document (dict) which is returned by any DatabaseConnector
+    def __init__(self, container=None):
+        self.md5 = None
+        self.sha1 = None
+        self.sha_256 = None
+        self.sha3_256 = None
+        self._compute_hashes(container)
 
-        Loads all persistent properties of an object from a dict.
+    def _compute_hashes(self):
+        hash_names = ['MD5', 'SHA1', 'SHA-256', 'SHA3-256']
+        result = Crypto.multihash(hash_names, container)
+        (self.md5, self.sha1, self.sha_256, self.sha3_256) = result
 
-        Arguments:
-            doc {dict} -- [description]
-        '''
-        raise NotImplementedError("DatabaseObject subclasses must implement "
-                                  "to_db() method.")
-
-
-    def to_db(self):
+    def _source(self):
         '''Creates a document (dict) which can be used by any DatabaseConnector
 
         Creates a dict which contains all persistent properties of an object.
@@ -62,5 +68,22 @@ class Hash(DatabaseObject):
         Returns:
             {dict} -- [description]
         '''
-        raise NotImplementedError("DatabaseObject subclasses must implement "
-                                  "to_db() method.")
+        return {
+            'md5': self.md5,
+            'sha1': self.sha1,
+            'sha_256': self.sha_256,
+            'sha3_256': self.sha3_256
+        }
+
+    def from_db(self, _source):
+        '''Loads a document (dict) which is returned by any DatabaseConnector
+
+        Loads all persistent properties of an object from a dict.
+
+        Arguments:
+            doc {dict} -- [description]
+        '''
+        self.md5 = _source['md5']
+        self.sha1 = _source['sha1']
+        self.sha_256 = _source['sha_256']
+        self.sha3_256 = _source['sha3_256']

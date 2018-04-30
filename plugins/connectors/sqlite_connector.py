@@ -25,6 +25,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from sqlite3 import connect
 from core.db.connector import DatabaseConnector
 # =============================================================================
 #  CLASSES
@@ -38,29 +39,46 @@ class SQLiteConnector(DatabaseConnector):
         '''Constructs the object
         '''
         super().__init__(conf)
+        self.conn = None
 
     def __str__(self):
+        '''String representation of the object
+        '''
         return str(super())
 
-    async def connect(self):
-        '''[summary]
-
-        [description]
+    def _is_connected(self):
+        '''Returns true if underlying connection is opened, False otherwise
         '''
-        self.logger.todo("implement SQLiteConnector.connect() method.")
+        return (self.conn is not None)
+
+    async def connect(self):
+        '''Opens underlying connection
+        '''
+        if self._is_connected():
+            LGR.warning("connect() called on an opened connection!")
+            return False
+
+        self.conn = connect(self.conf.path)
+        return True
 
     async def disconnect(self):
-        '''[summary]
-
-        [description]
+        '''Closes underlying connection
         '''
-        self.logger.todo("implement SQLiteConnector.disconnect() method.")
+        if not self._is_connected():
+            LGR.warning("disconnect() called on a closed connection!")
+            return
+
+        self.conn.close()
+        self.conn = None
 
     async def persist(self, objects):
         '''[summary]
 
         [description]
         '''
+        if not self._is_connected():
+            LGR.warning("persist() called on a closed connection!")
+            return False
         self.logger.todo("implement SQLiteConnector.persist() method.")
 
     async def retrieve(self, query):
@@ -68,6 +86,9 @@ class SQLiteConnector(DatabaseConnector):
 
         [description]
         '''
+        if not self._is_connected():
+            LGR.warning("retrieve() called on a closed connection!")
+            return False
         self.logger.todo("implement SQLiteConnector.retrieve) method.")
 
     async def delete(self, query):
@@ -75,4 +96,7 @@ class SQLiteConnector(DatabaseConnector):
 
         [description]
         '''
+        if not self._is_connected():
+            LGR.warning("delete() called on a closed connection!")
+            return False
         self.logger.todo("implement SQLiteConnector.delete() method.")

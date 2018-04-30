@@ -29,6 +29,7 @@ from uuid import UUID, uuid4
 from pathlib import Path
 from slugify import slugify
 from core.db.object import DatabaseObject
+from helper.bin_file import BinFile
 from helper.logging.logger import Logger
 from core.container.file_type_guesser import FileTypeGuesser
 # =============================================================================
@@ -43,6 +44,18 @@ class Container(DatabaseObject):
 
     [description]
     '''
+    INDEX = 'container'
+    FIELDS = [
+        ('uuid', DatabaseObject.FieldType.STRING),
+        ('parent', DatabaseObject.FieldType.STRING),
+        ('path', DatabaseObject.FieldType.STRING),
+        ('original_path', DatabaseObject.FieldType.STRING),
+        ('mime_type', DatabaseObject.FieldType.STRING),
+        ('mime_text', DatabaseObject.FieldType.STRING),
+        ('slug', DatabaseObject.FieldType.STRING),
+        ('size', DatabaseObject.FieldType.INT),
+    ]
+
     def __init__(self,
                  name='',
                  path=Path(),
@@ -60,15 +73,13 @@ class Container(DatabaseObject):
             name {str} -- [description] (default: {None})
             magic_file {str} -- [description] (default: {None})
         '''
-        super().__init__()
-
-        if parent is not None and not isinstance(parent, UUID):
+        if not isinstance(parent, UUID):
             raise ValueError("parent must be an instance of uuid.UUID")
-        if path is not None and not isinstance(path, Path):
+        if not isinstance(path, Path):
             raise ValueError("path must be an instance of pathlib.Path")
-        if original_path is not None and not isinstance(original_path, Path):
+        if not isinstance(original_path, Path):
             raise ValueError("original_path must be an instance of pathlib.Path")
-        if name is not None and not isinstance(name, str):
+        if not isinstance(name, str):
             raise ValueError("name must be an instance of str")
 
         self.parent = parent
@@ -79,30 +90,21 @@ class Container(DatabaseObject):
         self.uuid = uuid4()
         self.size = None
         guesser = FileTypeGuesser(magic_file=magic_file)
-        self.mime_text = guesser.mime_text()
-        self.mime_type = guesser.mime_type()
+        self.mime_text = guesser.mime_text(self.path)
+        self.mime_type = guesser.mime_type(self.path)
         if self.path is not None:
             stat = self.path.stat()
             self.size = stat.st_size
 
-    def from_db(self, doc):
-        '''Loads a document (dict) which is returned by any DatabaseConnector
-
-        Loads all persistent properties of an object from a dict.
-
-        Arguments:
-            doc {dict} -- [description]
+    def __str__(self):
+        '''String representation of the object
         '''
-        self.uuid = UUID(doc['uuid'])
-        self.parent = UUID(doc['parent'])
-        self.path = Path(doc['path'])
-        self.original_path = Path(doc['original_path'])
-        self.mime_type = doc['mime_type']
-        self.mime_text = doc['mime_text']
-        self.slug = doc['slug']
-        self.size = doc['size']
+        return "Container(uuid={},size={},mime={},path={})".format(self.uuid,
+                                                                   self.size,
+                                                                   self.mime_type,
+                                                                   self.path)
 
-    def to_db(self):
+    def _source(self):
         '''Creates a document (dict) which can be used by any DatabaseConnector
 
         Creates a dict which contains all persistent properties of an object.
@@ -120,3 +122,32 @@ class Container(DatabaseObject):
             'slug': self.slug,
             'size': self.size
         }
+
+    def from_db(self, _source):
+        '''Loads a document (dict) which is returned by any DatabaseConnector
+
+        Loads all persistent properties of an object from a dict.
+
+        Arguments:
+            _source {dict} -- [description]
+        '''
+        self.uuid = UUID(_source['uuid'])
+        self.parent = UUID(_source['parent'])
+        self.path = Path(_source['path'])
+        self.original_path = Path(_source['original_path'])
+        self.mime_type = _source['mime_type']
+        self.mime_text = _source['mime_text']
+        self.slug = _source['slug']
+        self.size = _source['size']
+
+    def bin_file(mode=BinFile.OpenMode.READ):
+        '''Opens a binary file for the container
+
+        Keyword Arguments:
+            mode {BinFile.OpenMode} -- Open mode for underlying binary file
+                                       (default: {BinFile.OpenMode.READ})
+
+        Returns:
+            [BinFile] -- New instance of binary file
+        '''
+        return BinFile(self.path, mode)

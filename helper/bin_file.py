@@ -25,6 +25,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from io import SEEK_SET
 from enum import Enum
 from pathlib import Path
 from helper.memory_map import MemoryMap
@@ -62,7 +63,7 @@ class BinFile:
         '''
         return path.is_file()
 
-    def __init__(self, path, mode=BinFile.OpenMode.READ):
+    def __init__(self, path, mode=OpenMode.READ):
         '''Constructs an object
 
         Arguments:
@@ -71,7 +72,7 @@ class BinFile:
         '''
         self.fp = None
         self.path = path if isinstance(path, Path) else Path(path)
-        self.mode = OpenMode(mode)
+        self.mode = BinFile.OpenMode(mode)
         self.dirname = path.parent
         self.basename = path.name
         self.rlvpath = path.resolve()
@@ -109,13 +110,13 @@ class BinFile:
             bool -- [description]
         '''
         if self.fp is not None:
-            LGR.warning("File is already opened.")
+            LGR.warning("File is already opened: {}".format(self))
             return False
 
         try:
             self.fp = self.path.open(self.mode+'b')
         except Exception as e:
-            LGR.exception("File open operation failed.")
+            LGR.exception("File open operation failed: {}".format(self))
             self.fp = None
             return False
 
@@ -128,7 +129,7 @@ class BinFile:
             bool -- [description]
         '''
         if self.fp is None:
-            LGR.warning("File is already closed.")
+            LGR.warning("File is already closed: {}".format(self))
             return False
 
         self.fp.close()
@@ -151,7 +152,7 @@ class BinFile:
         '''
         return self.stat().st_size
 
-    def seek(self, offset, whence=io.SEEK_SET):
+    def seek(self, offset, whence=SEEK_SET):
         '''[summary]
 
         Arguments:

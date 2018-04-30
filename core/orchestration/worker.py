@@ -102,8 +102,11 @@ class Worker:
     async def do_work(self):
         '''Worker starts consuming tasks asynchronously
         '''
+        loop = get_event_loop()
+
         LGR.debug("Worker n°{}: entering working loop...".format(self.num))
         while True:
+            LGR.debug("Worker n°{}: waiting for next task.")
             task = await self.tpq_in.get()
 
             if self.terminated:
@@ -118,7 +121,7 @@ class Worker:
                 LGR.debug("Worker n°{}: aborting.".format(self.num))
                 break
 
-            loop = get_event_loop()
+            LGR.debug("Worker n°{}: processing next task: {}".format(self.num, task))
             await loop.run_in_executor(self.executor, self._perform_task, task)
 
             LGR.debug("Worker n°{}: task completed.".format(self.num))

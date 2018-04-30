@@ -57,6 +57,7 @@ class Database:
         [description]
         '''
         self.connected = await self.connector.connect()
+        return self.connected
 
     async def term(self):
         '''[summary]
@@ -85,13 +86,13 @@ class Database:
     async def retrieve(self, query):
         '''Retrieves one or more objects
 
-        See DatabaseConnector.persist() for details
+        See DatabaseConnector.retrieve() for details
         '''
         return await self.connector.retrieve(query)
 
     async def delete(self, query):
         '''Deletes one or more objects
 
-        See DatabaseConnector.persist() for details
+        See DatabaseConnector.delete() for details
         '''
         return await self.connector.delete(query)

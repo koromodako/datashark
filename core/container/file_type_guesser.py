@@ -55,7 +55,7 @@ class FileTypeGuesser:
         if not path.is_file():
             return None
 
-        magic = Magic(magic_file=magic_file)
+        magic = Magic(magic_file=self.magic_file)
         return magic.from_file(str(path))
 
     def mime_type(self, path):

@@ -29,6 +29,7 @@ from enum import Enum
 from asyncio import gather, PriorityQueue, Queue
 from concurrent.futures import ProcessPoolExecutor
 from helper.logging.logger import Logger
+from core.orchestration.worker import Worker
 from core.orchestration.process_worker import ProcessWorker
 from core.orchestration.cluster_worker import ClusterWorker
 # =============================================================================
@@ -43,23 +44,21 @@ class WorkerPool:
 
     Represents a pool of workers.
     '''
-    def __init__(self, type, tpq_in, tq_out, conf):
+    def __init__(self, tpq_in, tq_out, conf):
         '''Constructs the object
 
         Arguments:
-            type {WorkerPool.Type} -- [description]
+            category {WorkerPool.Category} -- [description]
             max_workers {int} -- [description]
             tpq_in {asyncio.PriorityQueue} -- [description]
             tq_out {asyncio.Queue} -- [description]
             configuration {Configuration} -- [description]
         '''
-        self.type = type
-        self.max_workers = max_workers
         self.tpq_in = tpq_in
         self.tq_out = tq_out
+        self.conf = conf
         self.workers = []
         self.executor = ProcessPoolExecutor(max_workers=conf.max_workers)
-        self.conf = conf
 
     async def __aenter__(self):
         '''Context Manager async enter method
@@ -88,17 +87,22 @@ class WorkerPool:
 
         self.workers = []
 
-        if self.type == Worker.Category.PROCESS:
+        category = self.conf.worker_category
+        if category == Worker.Category.PROCESS:
             worker_cls = ProcessWorker
-        elif self.type == Worker.Category.CLUSTER:
+        elif category == Worker.Category.CLUSTER:
             worker_cls = ClusterWorker
+        else:
+            ValueError("Configuration value for worker_category does not "
+                       "match any known value: {}".format(category))
 
-        for k in range(self.size):
+        for k in range(self.conf.max_workers):
 
             worker = worker_cls(k,
                                 self.tpq_in,
                                 self.tq_out,
-                                self.configuration)
+                                self.executor,
+                                self.conf)
 
             await worker.initialize()
             self.workers.append(worker)
@@ -123,6 +127,7 @@ class WorkerPool:
         '''Gives worker the order to start consuming tasks
         '''
         LGR.debug("Starting workers...")
-        worker_group = gather([worker.do_work() for worker in self.workers])
+        coros = [worker.do_work() for worker in self.workers]
+        worker_group = gather(*coros)
         LGR.debug("Done starting workers.")
         return worker_group

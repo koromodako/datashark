@@ -95,25 +95,25 @@ class Task:
         self.succeeded = None
 
     def __str__(self):
-        return "Task(uuid={},category={},priority={})".format(self.uuid,
-                                                              self.category,
-                                                              self.priority)
+        return "Task(uuid={},category={},priority={},container={})".format(self.uuid,
+                                                                           self.category,
+                                                                           self.priority,
+                                                                           self.container)
+
+    def __lt__(self, other):
+        '''Comparison operator is defined on priority: lowest priority first
+        '''
+        return (self.priority < other.priority)
 
     @property
     def execution_time(self):
         return self.stop_time - self.start_time
 
     async def perform_hashing(self):
-        if not isinstance(self.plugin, Hash):
-            raise InvalidPluginTypeException("Hashing task received an "
-                                             "invalid plugin: "
-                                             "{}".format(self.plugin))
-
         ## Note:
-        ##    no need to check if this plugin is initialized as it is not
-        ##    really a plugin
-
-        return self.plugin.from_container(self.container)
+        ##    no need to check plugin as it is not really a plugin
+        LGR.info("Hash computation begins for {}".format(container))
+        return Hash(self.container)
 
     async def perform_dissection(self):
         '''Generator of Container instances
@@ -129,7 +129,8 @@ class Task:
             raise UninitializedPluginException("Uninitialized Dissector given "
                                                "to task.")
 
-        async for container in self.plugin.containers(container):
+        LGR.info("Dissection begins for {}".format(container))
+        async for container in self.plugin.dissect(container):
             yield container
 
     async def perform_examination(self):
@@ -146,31 +147,22 @@ class Task:
             raise UninitializedPluginException("Uninitialized Examiner given "
                                                "to task.")
 
+        LGR.info("Examination begins for {}".format(container))
         return await self.plugin.examine(self.container)
 
     async def perform_examiner_selection(self):
-        if not isinstance(self.plugin, PluginSelector):
-            raise InvalidPluginTypeException("Examiner selection task "
-                                             "received an invalid plugin: "
-                                             "{}".format(self.plugin))
-
         ## Note:
         ##    no need to check if this plugin is initialized as it is not
         ##    really a plugin
-
-        return self.plugin.select_examiners_for(self.container)
+        LGR.info("Examiner selection begins for {}".format(container))
+        return PluginSelector.select_examiners_for(self.container)
 
     async def perform_dissector_selection(self):
-        if not isinstance(self.plugin, PluginSelector):
-            raise InvalidPluginTypeException("Dissector selection task "
-                                             "received an invalid plugin: "
-                                             "{}".format(self.plugin))
-
         ## Note:
         ##    no need to check if this plugin is initialized as it is not
         ##    really a plugin
-
-        return self.plugin.select_dissectors_for(self.container)
+        LGR.info("Dissector selection begins for {}".format(container))
+        return PluginSelector.select_dissectors_for(self.container)
 
     async def perform(self):
         '''Generator of results

@@ -51,6 +51,7 @@ class Orchestrator:
         self.tq_out = Queue()
         self.tpq_in = PriorityQueue()
         self.aborted = False
+        self.worker_group = None
 
     async def _process_hashing_result(self, result):
         '''Treats all hashing result as final results and persist them into
@@ -135,27 +136,33 @@ class Orchestrator:
         elif task.category == Task.Category.DISSECTOR_SELECTION:
             await self._process_dissector_selection_result(task, result)
 
-    def abort(self):
+    @property
+    def processing(self):
+        return (self.worker_group is not None)
+
+    async def abort(self):
         '''Aborts tasks processing
         '''
         LGR.debug("Processing abortion requested.")
         self.aborted = True
+        await self.worker_group
 
-    async def schedule_tasks(tasks):
+    async def schedule_tasks(self, tasks):
         '''Schedules more tasks for processing
         '''
         for task in tasks:
             LGR.debug("Pushing {} into processing queue.".format(task))
-            await self.tpq_in.put((task.priority, task))
+            await self.tpq_in.put(task)
 
-    async def process_tasks(self, tasks):
-        '''Processes all tasks "recursively" until the job is done
+    async def process_tasks(self):
+        '''Processes all tasks until the input queue is empty or abort()
+        is called
         '''
         self.aborted = False
         # create a worker pool
-        async with WorkerPool(self.conf.worker_type, self.tpq_in, self.tq_out, self.conf) as pool:
+        async with WorkerPool(self.tpq_in, self.tq_out, self.conf) as pool:
             # start workers
-            worker_group = pool.perform_tasks()
+            self.worker_group = await pool.perform_tasks()
             # process results till the queue is empty
             while True:
                 LGR.debug("Waiting for a result to come...")
@@ -173,4 +180,5 @@ class Orchestrator:
                     LGR.debug("Abort processing.")
                     await pool.abort()
             # wait for workers' group to stop
-            await worker_group
+            await self.worker_group
+            self.worker_group = None

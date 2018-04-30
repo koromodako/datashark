@@ -56,22 +56,30 @@ def parse_args():
     sp.required = True
     # --- hash
     hash_p = sp.add_parser('hash')
-    hash_p.add_argument('input', help="File or directory to process")
+    hash_p.add_argument('--recurse', '-r', action='store_true',
+                        help="Tells datashark to walk recursively if input is "
+                             "a folder.")
+    hash_p.add_argument('input', type=Path, help="File or directory to process")
     # --- dissect
     dissect_p = sp.add_parser('dissect')
+    dissect_p.add_argument('--recurse', '-r', action='store_true',
+                           help="Tells datashark to walk recursively if input is "
+                             "a folder.")
     dissect_p.add_argument('--examine', help="Perform examination for each "
                                              "container extracted during "
                                              "dissection process.")
-    dissect_p.add_argument('input', help="File or directory to process")
+    dissect_p.add_argument('input', type=Path, help="File or directory to process")
     # --- examine
     examine_p = sp.add_parser('examine')
-    examine_p.add_argument('input', help="File or directory to process")
+    examine_p.add_argument('--recurse', '-r', action='store_true',
+                           help="Tells datashark to walk recursively if input is "
+                             "a folder.")
+    examine_p.add_argument('input', type=Path, help="File or directory to process")
     # --- plugins
     plugins_p = sp.add_parser('plugins')
     # --- version
     version_p = sp.add_parser('version')
-    # - main input argument
-
+    # - parse arguments now
     return p.parse_args()
 
 async def main():
@@ -114,13 +122,13 @@ async def main():
         return
 
     if args.command == 'hash':
-        pass
+        await ds.hash(args.input, args.recurse)
 
     elif args.command == 'dissect':
-        pass
+        await ds.dissect(args.input, args.recurse)
 
     elif args.command == 'examine':
-        pass
+        await ds.examine(args.input, args.recurse)
 
     await ds.term()
 # =============================================================================

@@ -137,47 +137,15 @@ class Datashark:
 
         [description]
         '''
+        # abort processing if necessary
+        if self.orchestrator.processing:
+            await self.orchestrator.abort()
         # terminate databases
-        self.orchestrator.abort()
         await self.hash_db.term()
         await self.whitelist_db.term()
         await self.blacklist_db.term()
         await self.dissection_db.term()
         await self.examination_db.term()
-
-    async def dissect(self, path, recurse=False):
-        '''[summary]
-
-        [description]
-        '''
-        files = [ path ]
-        if path.is_dir():
-            files = self.scan_dir(path, recurse)
-
-        tasks = [Task(Task.Category.DISSECTOR_SELECTION,
-                      self.plugin_selector,
-                      Container(name=file.name,
-                                path=file,
-                                original_path=file)) for file in files]
-
-        await self.process_tasks(tasks)
-
-    async def examine(self, path, recurse=False):
-        '''[summary]
-
-        [description]
-        '''
-        files = [ path ]
-        if path.is_dir():
-            files = self.scan_dir(path, recurse)
-
-        tasks = [Task(Task.Category.EXAMINER_SELECTION,
-                      self.plugin_selector,
-                      Container(name=file.name,
-                                path=file,
-                                original_path=file)) for file in files]
-
-        await self.process_tasks(tasks)
 
     async def hash(self, path, recurse=False):
         '''[summary]
@@ -189,9 +157,43 @@ class Datashark:
             files = self.scan_dir(path, recurse)
 
         tasks = [Task(Task.Category.HASHING,
-                      Hash,
+                      None,
                       Container(name=file.name,
                                 path=file,
                                 original_path=file)) for file in files]
 
-        await self.process_tasks(tasks)
+        await self._process_tasks(tasks)
+
+    async def dissect(self, path, recurse=False):
+        '''[summary]
+
+        [description]
+        '''
+        files = [ path ]
+        if path.is_dir():
+            files = self.scan_dir(path, recurse)
+
+        tasks = [Task(Task.Category.DISSECTOR_SELECTION,
+                      None,
+                      Container(name=file.name,
+                                path=file,
+                                original_path=file)) for file in files]
+
+        await self._process_tasks(tasks)
+
+    async def examine(self, path, recurse=False):
+        '''[summary]
+
+        [description]
+        '''
+        files = [ path ]
+        if path.is_dir():
+            files = self.scan_dir(path, recurse)
+
+        tasks = [Task(Task.Category.EXAMINER_SELECTION,
+                      None,
+                      Container(name=file.name,
+                                path=file,
+                                original_path=file)) for file in files]
+
+        await self._process_tasks(tasks)

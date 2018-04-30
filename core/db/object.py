@@ -39,13 +39,35 @@ class DatabaseObject:
 
     [description]
     '''
-    def from_db(self, doc):
-        '''Loads a document (dict) which is returned by any DatabaseConnector
+    class FieldType(Enum):
+        '''Field's type enumeration
+
+        Variables:
+            INT {str} -- [description]
+            BOOL {str} -- [description]
+            BYTES {str} -- [description]
+            FLOAT {str} -- [description]
+            STRING {str} -- [description]
+        '''
+        INT = 'int'
+        BOOL = 'bool'
+        BYTES = 'bytes'
+        FLOAT = 'float'
+        STRING = 'string'
+
+    def _source(self):
+        '''Creates dict which can be used by any DatabaseConnector
+
+        Creates a dict which contains all persistent properties mapped with
+        the appropriate field name
+        '''
+        raise NotImplementedError("DatabaseObject subclasses must implement "
+                                  "_source() method.")
+
+    def from_db(self, _source):
+        '''Loads a dict which is returned by any DatabaseConnector
 
         Loads all persistent properties of an object from a dict.
-
-        Arguments:
-            doc {dict} -- [description]
         '''
         raise NotImplementedError("DatabaseObject subclasses must implement "
                                   "from_db() method.")
@@ -53,11 +75,13 @@ class DatabaseObject:
     def to_db(self):
         '''Creates a document (dict) which can be used by any DatabaseConnector
 
-        Creates a dict which contains all persistent properties of an object.
-
-        Returns:
-            {dict} -- [description]
+        Creates a dict which contains all persistent properties and metadata
+        associated with an object.
         '''
-        raise NotImplementedError("DatabaseObject subclasses must implement "
-                                  "to_db() method.")
-
+        return {
+            '_meta': {
+                'index': self.INDEX,
+                'fields': self.FIELDS
+            },
+            '_source': self._source()
+        }
