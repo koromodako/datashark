@@ -41,7 +41,7 @@ class DevNullConnector(DatabaseConnector):
     def __init__(self, conf):
         '''Constructs the object
         '''
-        super().__init__(conf, 'dev_null')
+        super().__init__(conf)
 
     def __str__(self):
         return str(super())

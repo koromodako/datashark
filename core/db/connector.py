@@ -39,14 +39,13 @@ class DatabaseConnector(PluginInstance):
 
     Represents a generic connection with a database. It defines an interface.
     '''
-    def __init__(self, conf, name):
+    def __init__(self, conf):
         '''Constructs the object
 
         Arguments:
             conf {Configuration} -- [description]
-            name {str} -- [description]
         '''
-        super().__init__(Plugin.Category.DB_CONNECTOR, conf, name)
+        super().__init__(conf)
 
     def __str__(self):
         '''String representation of the object

@@ -37,7 +37,7 @@ class RedisConnector(DatabaseConnector):
     def __init__(self, conf):
         '''Constructs the object
         '''
-        super().__init__(conf, 'redis')
+        super().__init__(conf)
 
     def __str__(self):
         return str(super())

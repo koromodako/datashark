@@ -61,9 +61,9 @@ class Plugin:
 
     def __str__(self):
         return "Plugin(category={},instance_cls={})".format(self.category,
-                                                        self.instance_cls)
+                                                            self.instance_cls)
 
-    async def instance(self, conf):
+    def instance(self, conf):
         '''Plugin instance factory
 
         Datashark framework ensure that this operation is called and is
@@ -81,16 +81,13 @@ class Plugin:
 class PluginInstance:
     '''[summary]
     '''
-    def __init__(self, category, conf, name):
+    def __init__(self, conf):
         '''Constructs the object
 
         Arguments:
-            category {Plugin.Category} -- [description]
             conf {Configuration} -- [description]
             name {str} -- [description]
         '''
-        self.category = category
         self.conf = conf
-        self.name = name
-        self.slug = slugify(name)
-        self.logger = Logger(Logger.Category.PLUGIN, '{}.{}'.format(category, slug))
+        self.logger = Logger(Logger.Category.PLUGIN,
+                             self.__class__.__name__)

@@ -46,11 +46,12 @@ class Registry:
         super(Registry, self).__init__()
         self._plugins = {}
 
-    def print_list(self):
+    def list(self):
         '''Prints a human readable list of plugins
         '''
-        print("Loaded plugins: ", end='')
-        Formatter.pretty_print(self._plugins, 1)
+        text = "Loaded plugins: "
+        text += Formatter.pretty_str(self._plugins, 1)
+        return text
 
     def register(self, category, instance_cls):
         '''Registers a plugin

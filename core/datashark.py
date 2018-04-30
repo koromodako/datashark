@@ -91,7 +91,8 @@ class Datashark:
 
         db = Database(conn)
         if not await db.init():
-            raise DatabaseInitializationException("")
+            raise DatabaseInitializationException("Failed to initialize "
+                                                  "database. Details above.")
 
         return db
 

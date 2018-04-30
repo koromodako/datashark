@@ -44,18 +44,19 @@ class Examiner(PluginInstance):
           of a SQLite database or a Windows registry file)
         * and other things specific to some formats
     '''
-    def __init__(self, conf, name):
+    def __init__(self, conf):
         '''Constructs an object
 
         Arguments:
-            name {str} -- Examiner unique name
+            conf {Configuration} -- [description]
         '''
-        super().__init__(Plugin.Category.EXAMINER, conf, name)
+        super().__init__(conf)
 
     def supported_mime_types(self):
         '''Gives a list of MIME types which can be handled by this examiner
         '''
-        return self._instance.supported_mime_types()
+        raise NotImplementedError("Examiner subclasses must implement "
+                                  "supported_mime_types() method.")
 
     def can_examine(self, container):
         '''Checks if examination can be performed
@@ -67,7 +68,8 @@ class Examiner(PluginInstance):
             container {Container} -- Container to check for examination
                                      compatibility
         '''
-        return self._instance.can_examine(container)
+        raise NotImplementedError("Examiner subclasses must implement "
+                                  "can_examine() method.")
 
     async def examine(self, container):
         '''Examine a container
@@ -77,4 +79,5 @@ class Examiner(PluginInstance):
         Arguments:
             container {Container} -- Container to examine
         '''
-        return await self._instance.examine(container)
+        raise NotImplementedError("Examiner subclasses must implement "
+                                  "examine() method.")

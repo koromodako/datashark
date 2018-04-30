@@ -20,30 +20,30 @@ silent: false
 ## -----------------------------------------------------------------------------
 # Hash database used to store hashes generated during hashing process
 hash_db_conf:
-  connector: sqlite
+  connector: SQLiteConnector
   settings:
     path: /mnt/vms-share/ds-hash.db
 # Whitelist database used to flag legitimate files without
 # dissection/examination
 whitelist_db_conf:
-  connector: sqlite
+  connector: SQLiteConnector
   settings:
     path: /mnt/vms-share/ds-whitelist.db
 # Blacklist database used to flag malicious/suspect files without
 # dissection/examination
 blacklist_db_conf:
-  connector: sqlite
+  connector: SQLiteConnector
   settings:
     path: /mnt/vms-share/ds-blacklist.db
 # Dissection database used to store dissection results. It can be seen as the
 # full file hierarchy extracted from a given root container
 dissection_db_conf:
-  connector: sqlite
+  connector: SQLiteConnector
   settings:
     path: /mnt/vms-share/ds-dissection.db
 # Examination database used to store examination results.
 examination_db_conf:
-  connector: sqlite
+  connector: SQLiteConnector
   settings:
     path: /mnt/vms-share/ds-examination.db
 # -----------------------------------------------------------------------------

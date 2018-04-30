@@ -41,13 +41,13 @@ class Dissector(PluginInstance):
     parent container. This object will use one to several parsers to extract
     all "sub-containers" contained by given container.
     '''
-    def __init__(self, conf, name):
+    def __init__(self, conf):
         '''Constructs an object
 
         Arguments:
-            name {str} -- Dissector unique name
+            conf {Configuration} -- [description]
         '''
-        super().__init__(Plugin.Category.DISSECTOR, conf, name)
+        super().__init__(conf)
 
     def supported_mime_types(self):
         '''Gives a list of MIME types which can be handled by this dissector
