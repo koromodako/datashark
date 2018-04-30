@@ -25,7 +25,8 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from asyncio import PriorityQueue, Queue
+from asyncio import PriorityQueue, QueueEmpty, Queue, sleep
+from core.hash.hash import Hash
 from helper.logging.logger import Logger
 from core.orchestration.task import Task
 from core.orchestration.worker_pool import WorkerPool
@@ -44,12 +45,23 @@ class Orchestrator:
     It will consume results as they arrive to inject them back into processing
     queue or store them as final results.
     '''
-    def __init__(self, conf):
+    def __init__(self,
+                 conf,
+                 hash_db,
+                 whitelist_db,
+                 blacklist_db,
+                 dissection_db,
+                 examination_db):
         '''Constructs the object
         '''
         self.conf = conf
-        self.tq_out = Queue()
-        self.tpq_in = PriorityQueue()
+        self.hash_db = hash_db
+        self.whitelist_db = whitelist_db
+        self.blacklist_db = blacklist_db
+        self.dissection_db = dissection_db
+        self.examination_db = examination_db
+        self.qin = PriorityQueue()
+        self.qout = Queue()
         self.aborted = False
         self.worker_group = None
 
@@ -60,7 +72,15 @@ class Orchestrator:
         if not isinstance(result.data, Hash):
             raise RuntimeError("result.data must be a Hash instance here!")
 
-        self.conf.hash_db.persist(result.data)
+        if self.conf.check_black_or_white:
+
+            if self.blacklist_db.retrieve(result.data) is not None:
+                result.data.container.set_tag(Container.Tag.BLACKLISTED)
+
+            elif self.whitelist_db.retrieve(result.data) is not None:
+                result.data.container.set_tag(Container.Tag.WHITELISTED)
+
+        self.hash_db.persist(result.data)
 
     async def _process_dissection_result(self, result):
         '''Treats all dissection result as intermediary results and inject new
@@ -81,7 +101,7 @@ class Orchestrator:
 
             await self.schedule_tasks([es_task])
 
-        self.conf.dissection_db.persist(result.data)
+        self.dissection_db.persist(result.data)
 
     async def _process_examination_result(self, result):
         '''Treats all examination result as final results and persist them into
@@ -90,7 +110,7 @@ class Orchestrator:
         if not isinstance(result.data, Examination):
             raise RuntimeError("result.data must be an Examination instance here!")
 
-        self.conf.examination_db.persist(result.data)
+        self.examination_db.persist(result.data)
 
     async def _process_examiner_selection_result(self, result):
         '''Adds examination tasks for each selected examiner
@@ -116,25 +136,26 @@ class Orchestrator:
                                         dissector,
                                         result.task.container) for dissector in result.data])
 
-    async def _process_result(self, task, result):
+    async def _process_result(self, result):
         '''Processes one result depending on task type
         '''
-        LGR.debug("Processing one result from {}".fromat(task))
+        LGR.debug("Processing one result: {}".format(result))
 
+        task = result.task
         if task.category == Task.Category.HASHING:
-            await self._process_hashing_result(task, result)
+            await self._process_hashing_result(result)
 
         elif task.category == Task.Category.DISSECTION:
-            await self._process_dissection_result(task, result)
+            await self._process_dissection_result(result)
 
         elif task.category == Task.Category.EXAMINATION:
-            await self._process_examination_result(task, result)
+            await self._process_examination_result(result)
 
         elif task.category == Task.Category.EXAMINER_SELECTION:
-            await self._process_examiner_selection_result(task, result)
+            await self._process_examiner_selection_result(result)
 
         elif task.category == Task.Category.DISSECTOR_SELECTION:
-            await self._process_dissector_selection_result(task, result)
+            await self._process_dissector_selection_result(result)
 
     @property
     def processing(self):
@@ -152,7 +173,7 @@ class Orchestrator:
         '''
         for task in tasks:
             LGR.debug("Pushing {} into processing queue.".format(task))
-            await self.tpq_in.put(task)
+            await self.qin.put(task)
 
     async def process_tasks(self):
         '''Processes all tasks until the input queue is empty or abort()
@@ -160,25 +181,36 @@ class Orchestrator:
         '''
         self.aborted = False
         # create a worker pool
-        async with WorkerPool(self.tpq_in, self.tq_out, self.conf) as pool:
+        async with WorkerPool(self.conf, self.qin, self.qout) as pool:
             # start workers
-            self.worker_group = await pool.perform_tasks()
-            # process results till the queue is empty
+            LGR.debug("Starting workers in the pool.")
+            await pool.start()
+            # Note:
+            #   process results until the queue is empty
+            # Warning:
+            #   this loop must not contain a blocking function call
+            LGR.debug("Entering processing loop.")
             while True:
-                LGR.debug("Waiting for a result to come...")
-                result = await self.tq_out.get()
 
-                if result is None:
-                    LGR.debug("Result is None, breaking out of result loop")
+                if self.qin.empty() and self.qout.empty():
+                    # everything has been consumed and no operation remains
+                    # send EXIT tasks
+                    LGR.debug("Exiting processing loop.")
+                    await pool.exit()
                     break
 
-                await self._process_result(result)
-
-                self.tq_out.task_done()
+                try:
+                    result = self.qout.get_nowait()
+                    await self._process_result(result)
+                    self.qout.task_done()
+                except QueueEmpty as e:
+                    await sleep(0.1)
 
                 if self.aborted:
-                    LGR.debug("Abort processing.")
+                    LGR.debug("Abort processing loop.")
                     await pool.abort()
-            # wait for workers' group to stop
-            await self.worker_group
-            self.worker_group = None
+                    break
+
+            # wait for workers' group to stop, this is a kind of join
+            LGR.debug("Waiting for pool to terminate terminate workers.")
+            await pool.join()

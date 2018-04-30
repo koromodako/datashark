@@ -46,20 +46,19 @@ class Worker:
         '''Worker's category enumeration
 
         Variables:
-            CLUSTER {str} -- [description]
-            PROCESS {str} -- [description]
+            LOCAL {str} -- [description]
+            REMOTE {str} -- [description]
         '''
-        CLUSTER = 'cluster'
-        PROCESS = 'process'
+        LOCAL = 'local'
+        REMOTE = 'remote'
 
-    def __init__(self, num, tpq_in, tq_out, executor, configuration):
+    def __init__(self, num, conf, qin, qout):
         '''Constructs the object
         '''
         self.num = num
-        self.tpq_in = tpq_in
-        self.tq_out = tq_out
-        self.executor = executor
-        self.configuration = configuration
+        self.conf = conf
+        self.qin = qin
+        self.qout = qout
         self.terminated = None
 
     async def initialize(self):
@@ -93,7 +92,7 @@ class Worker:
 
         This method shall:
             1. perform actual task work
-            2. put (task,result) tuples in self.tq_out queue for further
+            2. put (task,result) tuples in self.qout queue for further
                processing
         '''
         raise NotImplementedError("Worker subclasses must implement "
@@ -102,30 +101,34 @@ class Worker:
     async def do_work(self):
         '''Worker starts consuming tasks asynchronously
         '''
-        loop = get_event_loop()
+        def debug(msg):
+            LGR.debug("Worker n°{}: {}".format(self.num, msg))
 
-        LGR.debug("Worker n°{}: entering working loop...".format(self.num))
         while True:
-            LGR.debug("Worker n°{}: waiting for next task.")
-            task = await self.tpq_in.get()
+            debug("waiting for next task.")
+            task = await self.qin.get()
 
             if self.terminated:
-                LGR.debug("Worker n°{}: terminated.".format(self.num))
+                debug("terminated.")
                 break
 
             if task is None:
-                LGR.debug("Worker n°{}: no more task to process.".format(self.num))
+                debug("no more task to process.")
                 break
 
             if task.category == Task.Category.ABORT:
-                LGR.debug("Worker n°{}: aborting.".format(self.num))
+                debug("aborting.")
                 break
 
-            LGR.debug("Worker n°{}: processing next task: {}".format(self.num, task))
-            await loop.run_in_executor(self.executor, self._perform_task, task)
+            if task.category == Task.Category.EXIT:
+                debug("exiting.")
+                break
 
-            LGR.debug("Worker n°{}: task completed.".format(self.num))
-            self.tpq_in.task_done()
+            debug("processing next task: {}".format(task))
+            await self._perform_task(task)
 
-        LGR.debug("Worker n°{}: leaving working loop.".format(self.num))
+            debug("task completed.")
+            self.qin.task_done()
+
+        debug("leaving working loop.")
 

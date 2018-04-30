@@ -54,6 +54,9 @@ class TaskResult:
         self.task = task
         self.data = data
 
+    def __str__(self):
+        return "TaskResult(task={},data={})".format(self.task, self.data)
+
 class Task:
     '''[summary]
 
@@ -68,6 +71,7 @@ class Task:
             DISSECTION {str} -- Dissection task
             EXAMINATION {str} -- Examination task
         '''
+        EXIT = 'exit'
         ABORT = 'abort'
         HASHING = 'hashing'
         DISSECTION = 'dissection'
@@ -89,7 +93,7 @@ class Task:
         self.category = category
         self.plugin = plugin
         self.container = container
-        self.priority = 0 if category == Task.Category.ABORT else 10
+        self.priority = self._set_priority()
         self.start_time = None
         self.stop_time = None
         self.succeeded = None
@@ -107,15 +111,31 @@ class Task:
 
     @property
     def execution_time(self):
+        '''[summary]
+        '''
         return self.stop_time - self.start_time
 
-    async def perform_hashing(self):
+    def _set_priority(self):
+        '''[summary]
+        '''
+        priority = 1
+
+        if self.category == Task.Category.EXIT:
+            priority = 2
+        elif self.category == Task.Category.ABORT:
+            priority = 0
+
+        return priority
+
+    def _perform_hashing(self):
+        '''[summary]
+        '''
         ## Note:
         ##    no need to check plugin as it is not really a plugin
-        LGR.info("Hash computation begins for {}".format(container))
+        LGR.info("Hash computation begins for {}".format(self.container))
         return Hash(self.container)
 
-    async def perform_dissection(self):
+    def _perform_dissection(self):
         '''Generator of Container instances
 
         Generates containers from given container
@@ -129,11 +149,10 @@ class Task:
             raise UninitializedPluginException("Uninitialized Dissector given "
                                                "to task.")
 
-        LGR.info("Dissection begins for {}".format(container))
-        async for container in self.plugin.dissect(container):
-            yield container
+        LGR.info("Dissection begins for {}".format(self.container))
+        return self.plugin.dissect(self.container)
 
-    async def perform_examination(self):
+    def _perform_examination(self):
         '''Generator of Examination instances
 
         Generates containers from given container
@@ -147,24 +166,28 @@ class Task:
             raise UninitializedPluginException("Uninitialized Examiner given "
                                                "to task.")
 
-        LGR.info("Examination begins for {}".format(container))
-        return await self.plugin.examine(self.container)
+        LGR.info("Examination begins for {}".format(self.container))
+        return self.plugin.examine(self.container)
 
-    async def perform_examiner_selection(self):
+    def _perform_examiner_selection(self):
+        '''[summary]
+        '''
         ## Note:
         ##    no need to check if this plugin is initialized as it is not
         ##    really a plugin
-        LGR.info("Examiner selection begins for {}".format(container))
+        LGR.info("Examiner selection begins for {}".format(self.container))
         return PluginSelector.select_examiners_for(self.container)
 
-    async def perform_dissector_selection(self):
+    def _perform_dissector_selection(self):
+        '''[summary]
+        '''
         ## Note:
         ##    no need to check if this plugin is initialized as it is not
         ##    really a plugin
-        LGR.info("Dissector selection begins for {}".format(container))
+        LGR.info("Dissector selection begins for {}".format(self.container))
         return PluginSelector.select_dissectors_for(self.container)
 
-    async def perform(self):
+    def perform(self):
         '''Generator of results
 
         Generates results from underlying computation task
@@ -174,20 +197,20 @@ class Task:
             self.start_time = time()
 
             if self.category == Task.Category.HASHING:
-                yield TaskResult(self, await self.perform_hashing())
+                yield TaskResult(self, self._perform_hashing())
 
             elif self.category == Task.Category.DISSECTION:
-                async for container in self.perform_dissection():
+                for container in self._perform_dissection():
                     yield TaskResult(self, container)
 
             elif self.category == Task.Category.EXAMINATION:
-                yield TaskResult(self, await self.perform_examination())
+                yield TaskResult(self, self._perform_examination())
 
             elif self.category == Task.Category.EXAMINER_SELECTION:
-                yield TaskResult(self, await self.perform_examiner_selection())
+                yield TaskResult(self, self._perform_examiner_selection())
 
             elif self.category == Task.Category.DISSECTOR_SELECTION:
-                yield TaskResult(self, await self.perform_dissector_selection())
+                yield TaskResult(self, self._perform_dissector_selection())
 
             self.succeeded = True
 

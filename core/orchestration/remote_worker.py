@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: process_worker.py
+#     file: remote_worker.py
 #     date: 2018-04-27
 #   author: paul.dautry
 #  purpose:
@@ -34,10 +34,10 @@ LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class ProcessWorker(Worker):
-    '''ProcessWorker class
+class RemoteWorker(Worker):
+    '''RemoteWorker class
 
-    Represents a worker executing locally in a separate process
+    Represents a worker distributed on a cluster of servers
     '''
     async def initialize(self):
         '''Performs initialization of the worker if needed
@@ -48,8 +48,7 @@ class ProcessWorker(Worker):
             1. set self.terminated to False
             2. return True on success, False otherwise
         '''
-        self.terminated = False
-        return True
+        LGR.todo("implement RemoteWorker.initialize()!")
 
     async def terminate(self):
         '''Performs cleanup of the worker if needed
@@ -60,8 +59,7 @@ class ProcessWorker(Worker):
             1. set self.terminated to True
             2. return True on success, False otherwise
         '''
-        self.terminated = True
-        return True
+        LGR.todo("implement RemoteWorker.terminate()!")
 
     async def _perform_task(self, task):
         '''Performs task asynchronously
@@ -70,8 +68,7 @@ class ProcessWorker(Worker):
 
         This method shall:
             1. perform actual task work
-            2. put (task,result) tuples in self.tq_out queue for further
+            2. put (task,result) tuples in self.qout queue for further
                processing
         '''
-        async for result in task.perform():
-            await self.tq_out.put(result)
+        LGR.todo("implement RemoteWorker._perform_task()!")

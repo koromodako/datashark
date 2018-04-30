@@ -140,7 +140,7 @@ class Container(DatabaseObject):
         self.slug = _source['slug']
         self.size = _source['size']
 
-    def bin_file(mode=BinFile.OpenMode.READ):
+    def bin_file(self, mode=BinFile.OpenMode.READ):
         '''Opens a binary file for the container
 
         Keyword Arguments:

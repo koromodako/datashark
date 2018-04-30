@@ -71,7 +71,7 @@ class Examiner(PluginInstance):
         raise NotImplementedError("Examiner subclasses must implement "
                                   "can_examine() method.")
 
-    async def examine(self, container):
+    def examine(self, container):
         '''Examine a container
 
         Performs the examination of the container.

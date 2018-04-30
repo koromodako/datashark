@@ -68,7 +68,7 @@ class Dissector(PluginInstance):
         raise NotImplementedError("Dissector subclasses must implement "
                                   "can_dissect() method.")
 
-    async def containers(self, container):
+    def containers(self, container):
         '''Extract containers from given container
 
         Performs the dissection of the container.

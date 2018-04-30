@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: cluster_worker.py
+#     file: process_worker.py
 #     date: 2018-04-27
 #   author: paul.dautry
 #  purpose:
@@ -34,10 +34,10 @@ LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class ClusterWorker(Worker):
-    '''ClusterWorker class
+class LocalWorker(Worker):
+    '''LocalWorker class
 
-    Represents a worker distributed on a cluster of servers
+    Represents a worker executing locally in a separate process
     '''
     async def initialize(self):
         '''Performs initialization of the worker if needed
@@ -48,7 +48,8 @@ class ClusterWorker(Worker):
             1. set self.terminated to False
             2. return True on success, False otherwise
         '''
-        LGR.todo("implement ClusterWorker.initialize()!")
+        self.terminated = False
+        return True
 
     async def terminate(self):
         '''Performs cleanup of the worker if needed
@@ -59,7 +60,8 @@ class ClusterWorker(Worker):
             1. set self.terminated to True
             2. return True on success, False otherwise
         '''
-        LGR.todo("implement ClusterWorker.terminate()!")
+        self.terminated = True
+        return True
 
     async def _perform_task(self, task):
         '''Performs task asynchronously
@@ -68,7 +70,9 @@ class ClusterWorker(Worker):
 
         This method shall:
             1. perform actual task work
-            2. put (task,result) tuples in self.tq_out queue for further
+            2. put (task,result) tuples in self.qout queue for further
                processing
         '''
-        LGR.todo("implement ClusterWorker._perform_task()!")
+        for result in task.perform():
+            LGR.debug("Pushing result: {}".format(result))
+            await self.qout.put(result)

@@ -49,10 +49,10 @@ examination_db_conf:
 # -----------------------------------------------------------------------------
 # WORKERS
 # -----------------------------------------------------------------------------
+# Worker's category [local, remote]
+worker_category: local
 # Max number of workers
 max_workers: 4
-# Worker's category [process, cluster]
-worker_category: process
 # Configuration per worker
 workers:
   - {}
@@ -64,10 +64,14 @@ workers:
 # -----------------------------------------------------------------------------
 # Should dissection process imply examination process ?
 dissect_and_examine: false
+# Should dissection/examination process check container against
+# blacklist_db and whitelist_db first ?
+check_black_or_white: false
 ## =============================================================================
 ## EXAMINERS SETTINGS
 ## =============================================================================
-
+examiners: {}
 ## =============================================================================
 ## DISSECTORS SETTINGS
 ## =============================================================================
+dissectors: {}

@@ -114,7 +114,7 @@ class BinFile:
             return False
 
         try:
-            self.fp = self.path.open(self.mode+'b')
+            self.fp = self.path.open(self.mode.value+'b')
         except Exception as e:
             LGR.exception("File open operation failed: {}".format(self))
             self.fp = None

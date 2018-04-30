@@ -50,9 +50,9 @@ class Configuration(Munch):
         if path is None:
             # try multiple path in the following order
             paths = [
-                Path().joinpath('datashark.conf'),
-                Path.home().joinpath('datashark.conf'),
-                Path('/etc/datashark/datashark.conf')
+                Path().joinpath('datashark.yml'),
+                Path.home().joinpath('datashark.yml'),
+                Path('/etc/datashark/datashark.yml')
             ]
             for p in paths:
                 if p.is_file():

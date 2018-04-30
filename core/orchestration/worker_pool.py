@@ -27,11 +27,11 @@
 # =============================================================================
 from enum import Enum
 from asyncio import gather, PriorityQueue, Queue
-from concurrent.futures import ProcessPoolExecutor
 from helper.logging.logger import Logger
+from core.orchestration.task import Task
 from core.orchestration.worker import Worker
-from core.orchestration.process_worker import ProcessWorker
-from core.orchestration.cluster_worker import ClusterWorker
+from core.orchestration.local_worker import LocalWorker
+from core.orchestration.remote_worker import RemoteWorker
 # =============================================================================
 #  GLOBALS
 # =============================================================================
@@ -44,21 +44,21 @@ class WorkerPool:
 
     Represents a pool of workers.
     '''
-    def __init__(self, tpq_in, tq_out, conf):
+    def __init__(self, conf, qin, qout):
         '''Constructs the object
 
         Arguments:
             category {WorkerPool.Category} -- [description]
             max_workers {int} -- [description]
-            tpq_in {asyncio.PriorityQueue} -- [description]
-            tq_out {asyncio.Queue} -- [description]
+            qin {asyncio.PriorityQueue} -- [description]
+            qout {asyncio.Queue} -- [description]
             configuration {Configuration} -- [description]
         '''
-        self.tpq_in = tpq_in
-        self.tq_out = tq_out
         self.conf = conf
+        self.qin = qin
+        self.qout = qout
         self.workers = []
-        self.executor = ProcessPoolExecutor(max_workers=conf.max_workers)
+        self.workers_coro = None
 
     async def __aenter__(self):
         '''Context Manager async enter method
@@ -79,19 +79,19 @@ class WorkerPool:
     async def allocate(self):
         '''Allocates workers to be used by the pool
         '''
-        if not isinstance(self.tpq_in, PriorityQueue):
+        if not isinstance(self.qin, PriorityQueue):
             raise RuntimeError("asyncio.PriorityQueue expected here!")
 
-        if not isinstance(self.tq_out, Queue):
+        if not isinstance(self.qout, Queue):
             raise RuntimeError("asyncio.Queue expected here!")
 
         self.workers = []
 
         category = self.conf.worker_category
-        if category == Worker.Category.PROCESS:
-            worker_cls = ProcessWorker
-        elif category == Worker.Category.CLUSTER:
-            worker_cls = ClusterWorker
+        if category == Worker.Category.LOCAL:
+            worker_cls = LocalWorker
+        elif category == Worker.Category.REMOTE:
+            worker_cls = RemoteWorker
         else:
             ValueError("Configuration value for worker_category does not "
                        "match any known value: {}".format(category))
@@ -99,10 +99,9 @@ class WorkerPool:
         for k in range(self.conf.max_workers):
 
             worker = worker_cls(k,
-                                self.tpq_in,
-                                self.tq_out,
-                                self.executor,
-                                self.conf)
+                                self.conf,
+                                self.qin,
+                                self.qout)
 
             await worker.initialize()
             self.workers.append(worker)
@@ -114,20 +113,39 @@ class WorkerPool:
             await worker.terminate()
         self.workers = []
 
-    async def abort(self):
-        '''Notify workers to finish currrent task and abort on the next one.
-
-        Inject abort tasks into IN Priority Queue to notify workers that they
-        must abort execution.
-        '''
-        for worker in self.workers:
-            await self.tpq_in.put((0, Task(Task.Category.ABORT, None, None)))
-
-    async def perform_tasks(self):
-        '''Gives worker the order to start consuming tasks
+    async def start(self):
+        '''Starts workers in the pool
         '''
         LGR.debug("Starting workers...")
         coros = [worker.do_work() for worker in self.workers]
-        worker_group = gather(*coros)
-        LGR.debug("Done starting workers.")
-        return worker_group
+        self.workers_coro = gather(*coros)
+        LGR.debug("Workers started.")
+
+    async def exit(self):
+        '''Notify workers to exit normally.
+
+        Inject as many EXIT tasks as workers in the pool into processing queue
+        to notify them that they have to exit normally.
+        '''
+        LGR.debug("Injecting EXIT tasks...")
+        for _ in self.workers:
+            await self.qin.put(Task(Task.Category.EXIT, None, None))
+        LGR.debug("EXIT tasks injected.")
+
+    async def abort(self):
+        '''Notify workers to abort on next task.
+
+        Inject as many ABORT tasks as workers in the pool into processing queue
+        to notify them that they have to exit normally.
+        '''
+        LGR.debug("Injecting ABORT tasks...")
+        for _ in self.workers:
+            await self.qin.put(Task(Task.Category.ABORT, None, None))
+        LGR.debug("ABORT tasks injected.")
+
+    async def join(self):
+        '''Gives worker the order to start consuming tasks
+        '''
+        LGR.debug("Waiting workers to stop...")
+        await self.workers_coro
+        LGR.debug("Workers stopped.")

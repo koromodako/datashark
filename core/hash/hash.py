@@ -53,11 +53,12 @@ class Hash(DatabaseObject):
         self.sha1 = None
         self.sha_256 = None
         self.sha3_256 = None
-        self._compute_hashes(container)
+        self.container = container
+        self._compute_hashes()
 
-    def _compute_hashes(self):
+    def _compute_hashes(self, container):
         hash_names = ['MD5', 'SHA1', 'SHA-256', 'SHA3-256']
-        result = Crypto.multihash(hash_names, container)
+        result = Crypto.multihash(hash_names, self.container)
         (self.md5, self.sha1, self.sha_256, self.sha3_256) = result
 
     def _source(self):
@@ -72,7 +73,8 @@ class Hash(DatabaseObject):
             'md5': self.md5,
             'sha1': self.sha1,
             'sha_256': self.sha_256,
-            'sha3_256': self.sha3_256
+            'sha3_256': self.sha3_256,
+            'container': self.container._source()
         }
 
     def from_db(self, _source):

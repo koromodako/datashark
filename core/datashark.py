@@ -113,10 +113,12 @@ class Datashark:
         # apply default configuration
         max_workers = self.conf.get('max_workers', 4)
         self.conf['max_workers'] = max_workers
-        worker_category = self.conf.get('worker_category', 'process')
+        worker_category = self.conf.get('worker_category', 'local')
         self.conf['worker_category'] = Worker.Category(worker_category)
         dissect_and_examine = self.conf.get('dissect_and_examine', False)
         self.conf['dissect_and_examine'] = dissect_and_examine
+        check_black_or_white = self.conf.get('check_black_or_white', False)
+        self.conf['check_black_or_white'] = check_black_or_white
         # initialize databases
         try:
             self.hash_db = await self._init_db('hash_db_conf')
@@ -129,7 +131,12 @@ class Datashark:
                           "Details below.")
             return False
         # create orchestrator
-        self.orchestrator = Orchestrator(self.conf)
+        self.orchestrator = Orchestrator(self.conf,
+                                         self.hash_db,
+                                         self.whitelist_db,
+                                         self.blacklist_db,
+                                         self.dissection_db,
+                                         self.examination_db)
         return True
 
     async def term(self):
@@ -173,11 +180,19 @@ class Datashark:
         if path.is_dir():
             files = self.scan_dir(path, recurse)
 
-        tasks = [Task(Task.Category.DISSECTOR_SELECTION,
-                      None,
-                      Container(name=file.name,
-                                path=file,
-                                original_path=file)) for file in files]
+        tasks = []
+        if self.conf.check_black_or_white:
+            tasks += [Task(Task.Category.HASHING,
+                           None,
+                           Container(name=file.name,
+                                     path=file,
+                                     original_path=file)) for file in files]
+
+        tasks += [Task(Task.Category.DISSECTOR_SELECTION,
+                       None,
+                       Container(name=file.name,
+                                 path=file,
+                                 original_path=file)) for file in files]
 
         await self._process_tasks(tasks)
 
@@ -190,7 +205,15 @@ class Datashark:
         if path.is_dir():
             files = self.scan_dir(path, recurse)
 
-        tasks = [Task(Task.Category.EXAMINER_SELECTION,
+        tasks = []
+        if self.conf.check_black_or_white:
+            tasks += [Task(Task.Category.HASHING,
+                           None,
+                           Container(name=file.name,
+                                     path=file,
+                                     original_path=file)) for file in files]
+
+        tasks += [Task(Task.Category.EXAMINER_SELECTION,
                       None,
                       Container(name=file.name,
                                 path=file,
