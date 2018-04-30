@@ -30,15 +30,17 @@ from core.plugin.registry import Registry
 # -----------------------------------------------------------------------------
 #  EXAMINERS
 # -----------------------------------------------------------------------------
-#from ${MODULE} import ${CLASS}
+#from plugins.examiners.class_examiner import ClassExaminer
 # -----------------------------------------------------------------------------
 #  DISSECTORS
 # -----------------------------------------------------------------------------
-#from ${MODULE} import ${CLASS}
+#from plugins.dissectors.class_dissector import ClassDissector
 # -----------------------------------------------------------------------------
 #  DB CONNECTORS
 # -----------------------------------------------------------------------------
 from plugins.connectors.fs_connector import FSConnector
+from plugins.connectors.redis_connector import RedisConnector
+from plugins.connectors.sqlite_connector import SQLiteConnector
 from plugins.connectors.dev_null_connector import DevNullConnector
 # =============================================================================
 #  GLOBALS
@@ -47,13 +49,15 @@ PLUGINS = Registry()
 # -----------------------------------------------------------------------------
 #  EXAMINERS
 # -----------------------------------------------------------------------------
-#PLUGINS.register()
+#PLUGINS.register(Plugin.Category.EXAMINER, )
 # -----------------------------------------------------------------------------
 #  DISSECTORS
 # -----------------------------------------------------------------------------
-#PLUGINS.register()
+#PLUGINS.register(Plugin.Category.DISSECTOR, )
 # -----------------------------------------------------------------------------
 #  DB CONNECTORS
 # -----------------------------------------------------------------------------
 PLUGINS.register(Plugin.Category.DB_CONNECTOR, FSConnector)
+PLUGINS.register(Plugin.Category.DB_CONNECTOR, RedisConnector)
+PLUGINS.register(Plugin.Category.DB_CONNECTOR, SQLiteConnector)
 PLUGINS.register(Plugin.Category.DB_CONNECTOR, DevNullConnector)

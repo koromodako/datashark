@@ -26,6 +26,7 @@
 #  IMPORTS
 # =============================================================================
 from plugins.plugins import PLUGINS
+from core.plugin.plugin import Plugin
 from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
@@ -37,16 +38,45 @@ LGR = Logger(Logger.Category.CORE, __name__)
 class PluginSelector:
 
     @staticmethod
+    def select_db_connector(name, settings):
+        '''[summary]
+        '''
+        conn = PLUGINS.instanciate(Plugin.Category.DB_CONNECTOR, name, settings)
+        LGR.debug("Connector selected: {}".format(conn))
+        return conn
+
+    @staticmethod
     def select_examiners_for(container):
         '''[summary]
-
-        [description]
 
         Arguments:
             container {[type]} -- [description]
         '''
-        LGR.todo("implement PluginSelector.select_examiners_for()!")
+        examiners = []
+
+        for name, plugin in PLUGINS.plugins(Plugin.Category.EXAMINER):
+            examiner = plugin.instance(None)
+
+            if examiner.can_examine(container):
+                LGR.debug("Examiner selected: {}".format(name))
+                examiners.append(examiner)
+
+        return examiners
 
     @staticmethod
     def select_dissectors_for(container):
-        LGR.todo("implement PluginSelector.select_dissectors_for()!")
+        '''[summary]
+
+        Arguments:
+            container {[type]} -- [description]
+        '''
+        dissectors = []
+
+        for name, plugin in PLUGINS.plugins(Plugin.Category.DISSECTOR):
+            dissector = plugin.instance(None)
+
+            if dissectors.can_dissect(container):
+                LGR.debug("Dissector selected: {}".format(name))
+                dissectors.append(dissector)
+
+        return dissectors

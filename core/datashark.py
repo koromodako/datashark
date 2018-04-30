@@ -28,6 +28,8 @@
 from os import walk
 from asyncio import Lock
 from plugins.plugins import PLUGINS
+from core.db.database import Database
+from helper.exception import DatabaseInitializationException
 from helper.logging.logger import Logger
 from core.orchestration.task import Task
 from core.container.container import Container
@@ -59,36 +61,94 @@ class Datashark:
 
         return [f.resolve() for f in path.glob('*') if f.is_file()]
 
-    def __init__(self,
-                 hash_db,
-                 whitelist_db,
-                 blacklist_db,
-                 dissection_db,
-                 examination_db,
-                 **kwargs):
-        self.plugin_selector = PluginSelector
-        conf = {
-            'hash_db': hash_db,
-            'max_workers': 4,
-            'worker_type': Worker.Category.PROCESS,
-            'whitelist_db': whitelist_db,
-            'blacklist_db': blacklist_db,
-            'dissection_db': dissection_db,
-            'examination_db': examination_db,
-            'plugin_selector': self.plugin_selector,
-            'dissect_and_examine': False,
-        }
-        conf.update(kwargs)
-        self.lock = Lock()
-        self.conf = Configuration.fromDict(conf)
-        self.orchestrator = Orchestrator(self.conf)
+    def __init__(self, conf):
+        '''[summary]
 
-    async def process_tasks(self, tasks):
+        [description]
+
+        Arguments:
+            conf {Configuration} -- [description]
+        '''
+        self.lock = Lock()
+        self.conf = conf
+        self.orchestrator = None
+
+    async def _init_db(self, conf_key):
+        '''[summary]
+
+        [description]
+        '''
+        db_conf = self.conf.get(conf_key)
+        if db_conf is None:
+            raise DatabaseInitializationException("Missing configuration key: "
+                                                  "{}".format(conf_key))
+
+        conn = PluginSelector.select_db_connector(db_conf.get('connector'),
+                                                  db_conf.get('settings'))
+        if conn is None:
+            raise DatabaseInitializationException("Failed to instanciate "
+                                                  "connector. Details above.")
+
+        db = Database(conn)
+        if not await db.init():
+            raise DatabaseInitializationException("")
+
+        return db
+
+    async def _process_tasks(self, tasks):
+        '''[summary]
+
+        [description]
+        '''
         async with self.lock:
             await self.orchestrator.schedule_tasks(tasks)
             await self.orchestrator.process_tasks()
 
+    async def init(self):
+        '''[summary]
+
+        [description]
+        '''
+        # apply default configuration
+        max_workers = self.conf.get('max_workers', 4)
+        self.conf['max_workers'] = max_workers
+        worker_category = self.conf.get('worker_category', 'process')
+        self.conf['worker_category'] = Worker.Category(worker_category)
+        dissect_and_examine = self.conf.get('dissect_and_examine', False)
+        self.conf['dissect_and_examine'] = dissect_and_examine
+        # initialize databases
+        try:
+            self.hash_db = await self._init_db('hash_db_conf')
+            self.whitelist_db = await self._init_db('whitelist_db_conf')
+            self.blacklist_db = await self._init_db('blacklist_db_conf')
+            self.dissection_db = await self._init_db('dissection_db_conf')
+            self.examination_db = await self._init_db('examination_db_conf')
+        except DatabaseInitializationException as e:
+            LGR.exception("An exception occured while initializing databases. "
+                          "Details below.")
+            return False
+        # create orchestrator
+        self.orchestrator = Orchestrator(self.conf)
+        return True
+
+    async def term(self):
+        '''[summary]
+
+        [description]
+        '''
+        # terminate databases
+        self.orchestrator.abort()
+        await self.hash_db.term()
+        await self.whitelist_db.term()
+        await self.blacklist_db.term()
+        await self.dissection_db.term()
+        await self.examination_db.term()
+
     async def dissect(self, path, recurse=False):
+        '''[summary]
+
+        [description]
+        '''
         files = [ path ]
         if path.is_dir():
             files = self.scan_dir(path, recurse)
@@ -102,6 +162,10 @@ class Datashark:
         await self.process_tasks(tasks)
 
     async def examine(self, path, recurse=False):
+        '''[summary]
+
+        [description]
+        '''
         files = [ path ]
         if path.is_dir():
             files = self.scan_dir(path, recurse)
@@ -115,6 +179,10 @@ class Datashark:
         await self.process_tasks(tasks)
 
     async def hash(self, path, recurse=False):
+        '''[summary]
+
+        [description]
+        '''
         files = [ path ]
         if path.is_dir():
             files = self.scan_dir(path, recurse)

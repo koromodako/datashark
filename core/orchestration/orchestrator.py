@@ -47,14 +47,10 @@ class Orchestrator:
     def __init__(self, conf):
         '''Constructs the object
         '''
+        self.conf = conf
         self.tq_out = Queue()
         self.tpq_in = PriorityQueue()
-        self.conf = conf
-
-    async def schedule_tasks(tasks):
-        for task in tasks:
-            LGR.debug("Pushing {} into processing queue.".format(task))
-            await self.tpq_in.put((task.priority, task))
+        self.aborted = False
 
     async def _process_hashing_result(self, result):
         '''Treats all hashing result as final results and persist them into
@@ -139,20 +135,42 @@ class Orchestrator:
         elif task.category == Task.Category.DISSECTOR_SELECTION:
             await self._process_dissector_selection_result(task, result)
 
+    def abort(self):
+        '''Aborts tasks processing
+        '''
+        LGR.debug("Processing abortion requested.")
+        self.aborted = True
+
+    async def schedule_tasks(tasks):
+        '''Schedules more tasks for processing
+        '''
+        for task in tasks:
+            LGR.debug("Pushing {} into processing queue.".format(task))
+            await self.tpq_in.put((task.priority, task))
+
     async def process_tasks(self, tasks):
         '''Processes all tasks "recursively" until the job is done
         '''
+        self.aborted = False
         # create a worker pool
         async with WorkerPool(self.conf.worker_type, self.tpq_in, self.tq_out, self.conf) as pool:
             # start workers
             worker_group = pool.perform_tasks()
             # process results till the queue is empty
             while True:
+                LGR.debug("Waiting for a result to come...")
                 result = await self.tq_out.get()
 
                 if result is None:
+                    LGR.debug("Result is None, breaking out of result loop")
                     break
 
                 await self._process_result(result)
 
                 self.tq_out.task_done()
+
+                if self.aborted:
+                    LGR.debug("Abort processing.")
+                    await pool.abort()
+            # wait for workers' group to stop
+            await worker_group

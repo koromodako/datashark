@@ -61,6 +61,22 @@ class WorkerPool:
         self.executor = ProcessPoolExecutor(max_workers=conf.max_workers)
         self.conf = conf
 
+    async def __aenter__(self):
+        '''Context Manager async enter method
+        '''
+        await self.allocate()
+        return self
+
+    async def __aexit__(self, exc_type, exc_value, traceback):
+        '''Context Manager async exit method
+
+        Arguments:
+            See Context Manager documentation
+        '''
+        if exc_type:
+            LGR.exception("An exception occured within caller with statement.")
+        await self.free()
+
     async def allocate(self):
         '''Allocates workers to be used by the pool
         '''
@@ -94,34 +110,6 @@ class WorkerPool:
             await worker.terminate()
         self.workers = []
 
-    async def __aenter__(self):
-        '''Context Manager async enter method
-        '''
-        await self.allocate()
-        return self
-
-    async def __aexit__(self, exc_type, exc_value, traceback):
-        '''Context Manager async exit method
-
-        Arguments:
-            See Context Manager documentation
-        '''
-        if exc_type:
-            LGR.exception("An exception occured within caller with statement.")
-        await self.free()
-
-    def __enter__(self):
-        '''Context Manager enter method
-        '''
-        raise RuntimeError("You must use 'async with' statement with the "
-                           "worker pool.")
-
-    def __exit__(self,  exc_type, exc_value, traceback):
-        '''Context Manager exit method
-        '''
-        raise RuntimeError("You must use 'async with' statement with the "
-                           "worker pool.")
-
     async def abort(self):
         '''Notify workers to finish currrent task and abort on the next one.
 
@@ -129,7 +117,7 @@ class WorkerPool:
         must abort execution.
         '''
         for worker in self.workers:
-            self.tpq_in.put((0, Task(Task.Category.ABORT, None, None)))
+            await self.tpq_in.put((0, Task(Task.Category.ABORT, None, None)))
 
     async def perform_tasks(self):
         '''Gives worker the order to start consuming tasks

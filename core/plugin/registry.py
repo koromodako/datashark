@@ -27,6 +27,7 @@
 # =============================================================================
 from core.plugin.plugin import Plugin
 from helper.logging.logger import Logger
+from helper.formatting.formatter import Formatter
 # =============================================================================
 #  GLOBALS
 # =============================================================================
@@ -40,15 +41,16 @@ class Registry:
     [description]
     '''
     def __init__(self):
-        '''[summary]
-
-        [description]
-
-        Arguments:
-            arg {[type]} -- [description]
+        '''Constructs the object
         '''
         super(Registry, self).__init__()
         self._plugins = {}
+
+    def print_list(self):
+        '''Prints a human readable list of plugins
+        '''
+        print("Loaded plugins: ", end='')
+        Formatter.pretty_print(self._plugins, 1)
 
     def register(self, category, instance_cls):
         '''Registers a plugin
@@ -58,47 +60,40 @@ class Registry:
         '''
         plugin = Plugin(category, instance_cls)
 
-        if Plugin.Category not in self._plugins:
+        if plugin.category not in self._plugins:
             self._plugins[plugin.category] = {}
 
         # register an instance of the plugin
         self._plugins[plugin.category][plugin.name] = plugin
 
-    def plugins(self, type=None, name=None):
+    def plugins(self, category):
         '''[summary]
 
+        [description]
+
         Arguments:
-            type {Plugin.Category} -- [description]
+            category {[type]} -- [description]
 
         Returns:
-            dict or None -- [description]
+            [type] -- [description]
         '''
-        if type is None:
-            return self._plugins
+        return self._plugins.get(category).items()
 
-        plugins = self._plugins.get(type)
-
-        if name is None:
-            return plugins
-
-        if plugins is None:
-            return None
-
-        return plugins.get(name)
-
-    def plugin_instance(self, type, name, conf):
-        '''Returns a plugin
+    def instanciate(self, category, name, conf):
+        '''Returns a plugin instance
 
         Arguments:
-            type {Plugin.Category} -- [description]
+            category {Plugin.Category} -- [description]
             name {str} -- [description]
 
         Returns:
             Plugin or None -- [description]
         '''
-        plugin = self._plugins.get(type, {}).get(name)
+        plugin = self._plugins.get(category, {}).get(name)
 
         if plugin is None:
+            LGR.error("Failed to find a plugin matching given constraints: "
+                      "(category={},name={})".format(category, name))
             return None
 
         return plugin.instance(conf)

@@ -58,6 +58,10 @@ class Configuration(Munch):
                 if p.is_file():
                     path = p
 
+        if path is None:
+            # return an empty config
+            return cls.fromDict({})
+
         try:
 
             with path.open('r') as f:

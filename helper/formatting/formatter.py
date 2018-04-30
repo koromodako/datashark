@@ -41,6 +41,7 @@ class Formatter:
     Provides many useful static methods to print bytefield using different
     representations
     '''
+    TAB = ' ' * 4
 
     @staticmethod
     def printable(byte):
@@ -78,7 +79,7 @@ class Formatter:
         '''[summary]
 
         Arguments:
-            data {bytes} -- [description]
+            data {bytes or bytearray} -- [description]
 
         Keyword Arguments:
             col_sz {int} -- [description] (default: {2})
@@ -124,7 +125,7 @@ class Formatter:
         '''[summary]
 
         Arguments:
-            data {bytes} -- [description]
+            data {bytes or bytearray} -- [description]
 
         Keyword Arguments:
             col_sz {int} -- [description] (default: {2})
@@ -132,15 +133,17 @@ class Formatter:
             human {bool} -- [description] (default: {True})
             max_lines {int} -- [description] (default: {10})
         '''
-        return "\n".join(hexdump_lines(data, col_sz, col_num, human, max_lines))
+        return "\n".join(Formatter.hexdump_lines(data,
+                                                 col_sz, col_num,
+                                                 human, max_lines))
 
     @staticmethod
     def hexdiff_lines(d1, d2, col_sz=2, col_num=4, human=True):
         '''[summary]
 
         Arguments:
-            d1 {bytes} -- First bytefield
-            d2 {bytes} -- Second bytefield
+            d1 {bytes or bytearray} -- First bytefield
+            d2 {bytes or bytearray} -- Second bytefield
 
         Keyword Arguments:
             col_sz {int} -- [description] (default: {2})
@@ -203,12 +206,69 @@ class Formatter:
         '''[summary]
 
         Arguments:
-            d1 {[type]} -- [description]
-            d2 {[type]} -- [description]
+            d1 {bytes or bytearray} -- [description]
+            d2 {bytes or bytearray} -- [description]
 
         Keyword Arguments:
             col_sz {int} -- [description] (default: {2})
             col_num {int} -- [description] (default: {4})
             human {bool} -- [description] (default: {True})
         '''
-        return "\n".join(hexdiff_lines(d1, d2, col_sz, col_num, human))
+        return "\n".join(Formatter.hexdiff_lines(d1, d2,
+                                                 col_sz, col_num,
+                                                 human))
+
+    @staticmethod
+    def pretty_str(obj, indent=0):
+        '''[summary]
+
+        Arguments:
+            obj {Typing.Any} -- [description]
+
+        Keyword Arguments:
+            indent {int} -- [description] (default: {0})
+s
+        Returns:
+            str -- [description]
+        '''
+        text = ''
+        indent_str = indent * Formatter.TAB
+
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                text += "\n{}+ {}: {}".format(indent_str, k,
+                                              Formatter.pretty_str(v,
+                                                                   indent+1))
+
+        elif isinstance(obj, list):
+            k = 0
+            for e in obj:
+                text += "\n{}- [{}]: {}".format(indent_str, k,
+                                                Formatter.pretty_str(e,
+                                                                     indent+1))
+                k += 1
+
+        elif isinstance(obj, (bytes, bytearray)):
+            lines = Formatter.hexdump_lines()
+            for line in lines:
+                text += '\n{}{}'.format(indent_str, line)
+        else:
+            text += '{}'.format(obj)
+
+        return text
+
+    @staticmethod
+    def pretty_print(obj, indent=0):
+        '''[summary]
+
+        Arguments:
+            obj {Typing.Any} -- [description]
+
+        Keyword Arguments:
+            indent {int} -- [description] (default: {0})
+        '''
+        print(Formatter.pretty_str(obj, indent))
+
+
+
+

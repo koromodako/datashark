@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: dev_null_connector.py
-#     date: 2018-04-28
+#     file: sqlite_connector.py
+#     date: 2018-04-30
 #   author: paul.dautry
 #  purpose:
 #
@@ -29,45 +29,50 @@ from core.db.connector import DatabaseConnector
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class DevNullConnector(DatabaseConnector):
-    '''DevNullConnector
+class SQLiteConnector(DatabaseConnector):
+    '''SQLiteConnector
 
-    Connects DB to nothing, everything is dropped.
-
-    1. Calling retrieve on this connector raises a RuntimeException,
-    2. calling all other methods is a equivalent to a nop.
+    Connects to a SQLite database
     '''
-
     def __init__(self, conf):
         '''Constructs the object
         '''
-        super().__init__(conf, 'dev_null')
+        super().__init__(conf, 'sqlite')
 
     def __str__(self):
         return str(super())
 
     async def connect(self):
-        '''This is a nop.
+        '''[summary]
+
+        [description]
         '''
-        pass
+        self.logger.todo("implement SQLiteConnector.connect() method.")
 
     async def disconnect(self):
-        '''This is a nop.
+        '''[summary]
+
+        [description]
         '''
-        pass
+        self.logger.todo("implement SQLiteConnector.disconnect() method.")
 
     async def persist(self, objects):
-        '''This is a nop.
+        '''[summary]
+
+        [description]
         '''
-        pass
+        self.logger.todo("implement SQLiteConnector.persist() method.")
 
     async def retrieve(self, query):
-        '''Calling this method is not allowed.
+        '''[summary]
+
+        [description]
         '''
-        raise RuntimeError("Calling retrieve on a DevNullConnector is not "
-                           "allowed.")
+        self.logger.todo("implement SQLiteConnector.retrieve) method.")
 
     async def delete(self, query):
-        '''This is a nop.
+        '''[summary]
+
+        [description]
         '''
-        pass
+        self.logger.todo("implement SQLiteConnector.delete() method.")

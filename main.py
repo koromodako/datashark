@@ -32,8 +32,8 @@ from asyncio import get_event_loop
 from argparse import ArgumentParser
 from core.datashark import Datashark
 from plugins.plugins import PLUGINS
+from core.configuration import Configuration
 from helper.logging.logger import Logger
-from core.plugin.plugin_selector import PluginSelector
 # =============================================================================
 #  GLOBALS
 # =============================================================================
@@ -42,6 +42,10 @@ LGR = Logger(Logger.Category.CORE, __name__)
 #  FUNCTIONS
 # =============================================================================
 def parse_args():
+    '''[summary]
+
+    [description]
+    '''
     p = ArgumentParser()
     # - add main parser arguments
     p.add_argument('--debug', '-d', action='store_true', help="Enables debug output.")
@@ -55,6 +59,9 @@ def parse_args():
     hash_p.add_argument('input', help="File or directory to process")
     # --- dissect
     dissect_p = sp.add_parser('dissect')
+    dissect_p.add_argument('--examine', help="Perform examination for each "
+                                             "container extracted during "
+                                             "dissection process.")
     dissect_p.add_argument('input', help="File or directory to process")
     # --- examine
     examine_p = sp.add_parser('examine')
@@ -68,11 +75,13 @@ def parse_args():
     return p.parse_args()
 
 async def main():
+    '''[summary]
+
+    [description]
+    '''
     args = parse_args()
 
-    conf = {}
-    if args.config is not None:
-        conf = Configuration.load(args.config)
+    conf = Configuration.load(args.config)
 
     args.debug = args.debug or conf.get('debug', False)
     args.silent = args.silent or conf.get('silent', False)
@@ -93,28 +102,25 @@ async def main():
         return
 
     if args.command == 'plugins':
-        plugins = PLUGINS.plugins()
-        for category in plugins.keys():
-            print(category)
-            for name, plugin in plugins[category].items():
-                print(plugin)
+        PLUGINS.print_list()
         return
 
-    hash_db = Database()
-    whitelist_db = Database()
-    blacklist_db = Database()
-    dissection_db = Database()
-    examination_db = Database()
+    ds = Datashark(conf)
 
-    ds = Datashark(hash_db,
-                   whitelist_db,
-                   blacklist_db,
-                   dissection_db,
-                   examination_db)
+    if not await ds.init():
+        LGR.error("Datashark.init() failed. Details above.")
+        return
 
-# =============================================================================
-#  CLASSES
-# =============================================================================
+    if args.command == 'hash':
+        pass
+
+    elif args.command == 'dissect':
+        pass
+
+    elif args.command == 'examine':
+        pass
+
+    await ds.term()
 # =============================================================================
 #  SCRIPT
 # =============================================================================

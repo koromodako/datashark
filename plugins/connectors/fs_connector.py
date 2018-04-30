@@ -32,35 +32,47 @@ from core.db.connector import DatabaseConnector
 class FSConnector(DatabaseConnector):
     '''FSConnector
 
-    Connects FS-based database
+    Connects to a FS-based database
     '''
     def __init__(self, conf):
         '''Constructs the object
         '''
         super().__init__(conf, 'fs')
 
+    def __str__(self):
+        return str(super())
+
     async def connect(self):
-        '''This is a nop.
+        '''[summary]
+
+        [description]
         '''
-        pass
+        self.logger.todo("implement FSConnector.connect() method.")
 
     async def disconnect(self):
-        '''This is a nop.
+        '''[summary]
+
+        [description]
         '''
-        pass
+        self.logger.todo("implement FSConnector.disconnect() method.")
 
     async def persist(self, objects):
-        '''This is a nop.
+        '''[summary]
+
+        [description]
         '''
-        pass
+        self.logger.todo("implement FSConnector.persist() method.")
 
     async def retrieve(self, query):
-        '''Calling this method is not allowed.
+        '''[summary]
+
+        [description]
         '''
-        raise RuntimeError("Calling retrieve on a DevNullConnector is not "
-                           "allowed.")
+        self.logger.todo("implement FSConnector.retrieve) method.")
 
     async def delete(self, query):
-        '''This is a nop.
+        '''[summary]
+
+        [description]
         '''
-        pass
+        self.logger.todo("implement FSConnector.delete() method.")

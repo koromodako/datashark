@@ -100,7 +100,10 @@ class Logger:
         if '.' in name:
             name = name.split('.')[-1]
 
-        self.name = 'datashark.{}.{}'.format(category, name)
+        if name == '__main__':
+            self.name = 'datashark.{}'.format(name)
+        else:
+            self.name = 'datashark.{}.{}'.format(category, name)
         self._logger = getLogger(self.name)
 
     def debug(self, msg, *args, **kwargs):

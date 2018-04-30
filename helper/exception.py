@@ -34,5 +34,9 @@ class UninitializedPluginException(Exception):
 class LinuxSpecificFeatureException(Exception):
     pass
 
+class DatabaseInitializationException(Exception):
+    pass
+
 class MSWindowsSpecificFeatureException(Exception):
     pass
+
