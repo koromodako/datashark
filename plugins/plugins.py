@@ -40,8 +40,10 @@ from core.plugin.registry import Registry
 # -----------------------------------------------------------------------------
 from plugins.connectors.fs_connector import FSConnector
 from plugins.connectors.redis_connector import RedisConnector
+from plugins.connectors.mysql_connector import MySQLConnector
 from plugins.connectors.sqlite_connector import SQLiteConnector
 from plugins.connectors.dev_null_connector import DevNullConnector
+from plugins.connectors.postgresql_connector import PostgreSQLConnector
 # =============================================================================
 #  GLOBALS
 # =============================================================================
@@ -59,5 +61,7 @@ PLUGINS = Registry()
 # -----------------------------------------------------------------------------
 PLUGINS.register(Plugin.Category.DB_CONNECTOR, FSConnector)
 PLUGINS.register(Plugin.Category.DB_CONNECTOR, RedisConnector)
+PLUGINS.register(Plugin.Category.DB_CONNECTOR, MySQLConnector)
 PLUGINS.register(Plugin.Category.DB_CONNECTOR, SQLiteConnector)
 PLUGINS.register(Plugin.Category.DB_CONNECTOR, DevNullConnector)
+PLUGINS.register(Plugin.Category.DB_CONNECTOR, PostgreSQLConnector)

@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: dev_null_connector.py
-#     date: 2018-04-28
+#     file: mysql_connector.py
+#     date: 2018-05-01
 #   author: paul.dautry
 #  purpose:
 #
@@ -25,44 +25,64 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from aiomysql import create_pool
 from core.db.connector import DatabaseConnector
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class DevNullConnector(DatabaseConnector):
-    '''DevNullConnector
+class MySQLConnector(DatabaseConnector):
+    '''MySQLConnector
 
-    Connects DB to nothing, everything is dropped.
-
-    1. Calling retrieve on this connector raises a RuntimeException,
-    2. calling all other methods is a equivalent to a nop.
+    Connects to a MySQL database
     '''
-
     def __init__(self, conf):
         '''Constructs the object
         '''
         super().__init__(conf)
+        self.conn = None
 
     def __str__(self):
+        '''String representation of the object
+        '''
         return str(super())
 
-    async def connect(self):
-        '''This is a nop.
+    def _is_connected(self):
+        '''Returns true if underlying connection is opened, False otherwise
         '''
-        pass
+        return (self.conn is not None)
+
+    async def connect(self):
+        '''Opens underlying connection
+        '''
+        if self._is_connected():
+            self.logger.warning("connect() called on an opened connection!")
+            return False
+        self.logger.todo("implement MySQLConnector.connect() method.")
 
     async def disconnect(self):
-        '''This is a nop.
+        '''Closes underlying connection
         '''
-        pass
+        if not self._is_connected():
+            self.logger.warning("disconnect() called on a closed connection!")
+            return
+        self.logger.todo("implement MySQLConnector.disconnect() method.")
 
     async def persist(self, objects):
-        '''This is a nop.
+        '''[summary]
+
+        [description]
         '''
-        pass
+        if not self._is_connected():
+            self.logger.warning("persist() called on a closed connection!")
+            return False
+        self.logger.todo("implement MySQLConnector.persist() method.")
 
     async def retrieve(self, query):
-        '''Calling this method is not allowed.
+        '''[summary]
+
+        [description]
         '''
-        raise RuntimeError("Calling retrieve on a DevNullConnector is "
-                           "nonsense.")
+        if not self._is_connected():
+            self.logger.warning("retrieve() called on a closed connection!")
+            return False
+        self.logger.todo("implement MySQLConnector.retrieve) method.")

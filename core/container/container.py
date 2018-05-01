@@ -28,7 +28,7 @@
 from uuid import UUID, uuid4
 from pathlib import Path
 from slugify import slugify
-from core.db.object import DatabaseObject
+from core.db.object import DBObject
 from helper.bin_file import BinFile
 from helper.logging.logger import Logger
 from core.container.file_type_guesser import FileTypeGuesser
@@ -39,21 +39,21 @@ LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class Container(DatabaseObject):
+class Container(DBObject):
     '''[summary]
 
     [description]
     '''
     INDEX = 'container'
     FIELDS = [
-        ('uuid', DatabaseObject.FieldType.STRING),
-        ('parent', DatabaseObject.FieldType.STRING),
-        ('path', DatabaseObject.FieldType.STRING),
-        ('original_path', DatabaseObject.FieldType.STRING),
-        ('mime_type', DatabaseObject.FieldType.STRING),
-        ('mime_text', DatabaseObject.FieldType.STRING),
-        ('slug', DatabaseObject.FieldType.STRING),
-        ('size', DatabaseObject.FieldType.INT),
+        ('uuid', DBObject.DataType.STRING),
+        ('parent', DBObject.DataType.STRING),
+        ('path', DBObject.DataType.STRING),
+        ('original_path', DBObject.DataType.STRING),
+        ('mime_type', DBObject.DataType.STRING),
+        ('mime_text', DBObject.DataType.STRING),
+        ('slug', DBObject.DataType.STRING),
+        ('size', DBObject.DataType.INT),
     ]
 
     def __init__(self,

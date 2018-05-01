@@ -26,7 +26,7 @@
 #  IMPORTS
 # =============================================================================
 from enum import Enum
-from core.db.object import DatabaseObject
+from core.db.object import DBObject
 from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
@@ -72,14 +72,16 @@ class Database:
 
         See DatabaseConnector.persist() for details
         '''
-        objects = []
+        if not isinstance(objs, list):
+            objs = [objs]
 
+        objects = []
         for obj in objs:
-            if isinstance(obj, DatabaseObject):
+            if isinstance(obj, DBObject):
                 objects.append(obj.to_db())
             else:
                 raise ValueError("Database can only persists subclasses of "
-                                 "DatabaseObject instances.")
+                                 "DBObject instances.")
 
         return await self.connector.persist(objects)
 

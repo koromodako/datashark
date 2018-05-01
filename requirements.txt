@@ -1,6 +1,9 @@
 munch
+aiopg
+aiomysql
 aioredis
 termcolor
+aiosqlite3
 ruamel.yaml
 python-magic
 pycryptodome

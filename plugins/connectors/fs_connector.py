@@ -70,9 +70,3 @@ class FSConnector(DatabaseConnector):
         '''
         self.logger.todo("implement FSConnector.retrieve) method.")
 
-    async def delete(self, query):
-        '''[summary]
-
-        [description]
-        '''
-        self.logger.todo("implement FSConnector.delete() method.")

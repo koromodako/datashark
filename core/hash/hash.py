@@ -26,7 +26,7 @@
 #  IMPORTS
 # =============================================================================
 from helper.crypto import Crypto
-from core.db.object import DatabaseObject
+from core.db.object import DBObject
 from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
@@ -35,17 +35,18 @@ LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class Hash(DatabaseObject):
+class Hash(DBObject):
     '''Represents a hash result of a container
 
     Stores multiple hash values for a single container.
     '''
     INDEX = 'hash'
     FIELDS = [
-        ('md5', DatabaseObject.FieldType.STRING),
-        ('sha1', DatabaseObject.FieldType.STRING),
-        ('sha_256', DatabaseObject.FieldType.STRING),
-        ('sha3_256', DatabaseObject.FieldType.STRING),
+        ('md5', DBObject.DataType.STRING),
+        ('sha1', DBObject.DataType.STRING),
+        ('sha_256', DBObject.DataType.STRING),
+        ('sha3_256', DBObject.DataType.STRING),
+        ('container_uuid', DBObject.DataType.STRING)
     ]
 
     def __init__(self, container=None):
@@ -54,9 +55,10 @@ class Hash(DatabaseObject):
         self.sha_256 = None
         self.sha3_256 = None
         self.container = container
+        self.container_uuid = container.uuid
         self._compute_hashes()
 
-    def _compute_hashes(self, container):
+    def _compute_hashes(self):
         hash_names = ['MD5', 'SHA1', 'SHA-256', 'SHA3-256']
         result = Crypto.multihash(hash_names, self.container)
         (self.md5, self.sha1, self.sha_256, self.sha3_256) = result
@@ -74,7 +76,7 @@ class Hash(DatabaseObject):
             'sha1': self.sha1,
             'sha_256': self.sha_256,
             'sha3_256': self.sha3_256,
-            'container': self.container._source()
+            'container_uuid': self.container._source()['uuid']
         }
 
     def from_db(self, _source):
@@ -89,3 +91,4 @@ class Hash(DatabaseObject):
         self.sha1 = _source['sha1']
         self.sha_256 = _source['sha_256']
         self.sha3_256 = _source['sha3_256']
+        self.container_uuid = UUID(_source['container_uuid'])

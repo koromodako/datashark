@@ -25,7 +25,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from core.db.object import DatabaseObject
+from core.db.object import DBObject
 from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
@@ -34,7 +34,7 @@ LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class Dissection(DatabaseObject):
+class Dissection(DBObject):
     '''Represent a full dissection case
 
     Keep track of all resources linked to a dissection and dissection results.
@@ -50,7 +50,7 @@ class Dissection(DatabaseObject):
         Arguments:
             doc {dict} -- [description]
         '''
-        raise NotImplementedError("DatabaseObject subclasses must implement "
+        raise NotImplementedError("DBObject subclasses must implement "
                                   "to_db() method.")
 
 
@@ -62,7 +62,7 @@ class Dissection(DatabaseObject):
         Returns:
             {dict} -- [description]
         '''
-        raise NotImplementedError("DatabaseObject subclasses must implement "
+        raise NotImplementedError("DBObject subclasses must implement "
                                   "to_db() method.")
 
 

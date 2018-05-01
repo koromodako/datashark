@@ -25,7 +25,8 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from sqlite3 import connect
+from aiosqlite3 import connect
+from core.db.object import DBObject
 from core.db.connector import DatabaseConnector
 # =============================================================================
 #  CLASSES
@@ -35,6 +36,14 @@ class SQLiteConnector(DatabaseConnector):
 
     Connects to a SQLite database
     '''
+    TYPE_MAPPING = {
+        DBObject.DataType.INT: 'INTEGER',
+        DBObject.DataType.BOOL: 'INTEGER',
+        DBObject.DataType.BYTES: 'BLOB',
+        DBObject.DataType.FLOAT: 'REAL',
+        DBObject.DataType.STRING: 'TEXT'
+    }
+
     def __init__(self, conf):
         '''Constructs the object
         '''
@@ -55,21 +64,56 @@ class SQLiteConnector(DatabaseConnector):
         '''Opens underlying connection
         '''
         if self._is_connected():
-            LGR.warning("connect() called on an opened connection!")
+            self.logger.warning("connect() called on an opened connection!")
             return False
 
-        self.conn = connect(self.conf.path)
+        self.conn = await connect(self.conf.path)
         return True
 
     async def disconnect(self):
         '''Closes underlying connection
         '''
         if not self._is_connected():
-            LGR.warning("disconnect() called on a closed connection!")
+            self.logger.warning("disconnect() called on a closed connection!")
             return
 
-        self.conn.close()
+        await self.conn.close()
         self.conn = None
+
+    async def _table_exists(self, obj):
+        query = "SELECT * FROM sqlite_master "
+        query += "WHERE name='{}' ".format(obj['_meta']['index'])
+        query += "AND type='table';"
+
+        self.logger.debug("Querying database: {}".format(query))
+        async with self.conn.cursor() as cursor:
+            await cursor.execute(query)
+            r = await cursor.fetchall()
+
+        return (len(r) != 0)
+
+    async def _create_table(self, obj):
+        query = "CREATE TABLE IF NOT EXISTS {}(".format(obj['_meta']['index'])
+        for name, data_type in obj['_meta']['fields']:
+            query += "{} {}, ".format(name,
+                                      SQLiteConnector.TYPE_MAPPING[data_type])
+        query = query[:-2] + ");"
+
+        self.logger.debug("Querying database: {}".format(query))
+        async with self.conn.cursor() as cursor:
+            r = await cursor.execute(query)
+
+    async def _insert_one(self, obj):
+        query_p1 = "INSERT INTO {}(".format(obj['_meta']['index'])
+        query_p2 = "VALUES("
+        for name, value in obj['_source'].items():
+            query_p1 += "{}, ".format(name)
+            query_p2 += "'{}', ".format(value)
+        query = query_p1[:-2] + ") " + query_p2[:-2] + ")"
+
+        self.logger.debug("Querying database: {}".format(query))
+        async with self.conn.cursor() as cursor:
+            r = await cursor.execute(query)
 
     async def persist(self, objects):
         '''[summary]
@@ -77,9 +121,13 @@ class SQLiteConnector(DatabaseConnector):
         [description]
         '''
         if not self._is_connected():
-            LGR.warning("persist() called on a closed connection!")
+            self.logger.warning("persist() called on a closed connection!")
             return False
-        self.logger.todo("implement SQLiteConnector.persist() method.")
+
+        for obj in objects:
+            if not await self._table_exists(obj):
+                await self._create_table(obj)
+            await self._insert_one(obj)
 
     async def retrieve(self, query):
         '''[summary]
@@ -87,16 +135,6 @@ class SQLiteConnector(DatabaseConnector):
         [description]
         '''
         if not self._is_connected():
-            LGR.warning("retrieve() called on a closed connection!")
+            self.logger.warning("retrieve() called on a closed connection!")
             return False
         self.logger.todo("implement SQLiteConnector.retrieve) method.")
-
-    async def delete(self, query):
-        '''[summary]
-
-        [description]
-        '''
-        if not self._is_connected():
-            LGR.warning("delete() called on a closed connection!")
-            return False
-        self.logger.todo("implement SQLiteConnector.delete() method.")

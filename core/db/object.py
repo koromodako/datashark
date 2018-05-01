@@ -34,13 +34,13 @@ LGR = Logger(Logger.Category.CORE, __name__)
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class DatabaseObject:
+class DBObject:
     '''[summary]
 
     [description]
     '''
-    class FieldType(Enum):
-        '''Field's type enumeration
+    class DataType(Enum):
+        '''DataType's type enumeration
 
         Variables:
             INT {str} -- [description]
@@ -61,7 +61,7 @@ class DatabaseObject:
         Creates a dict which contains all persistent properties mapped with
         the appropriate field name
         '''
-        raise NotImplementedError("DatabaseObject subclasses must implement "
+        raise NotImplementedError("DBObject subclasses must implement "
                                   "_source() method.")
 
     def from_db(self, _source):
@@ -69,7 +69,7 @@ class DatabaseObject:
 
         Loads all persistent properties of an object from a dict.
         '''
-        raise NotImplementedError("DatabaseObject subclasses must implement "
+        raise NotImplementedError("DBObject subclasses must implement "
                                   "from_db() method.")
 
     def to_db(self):

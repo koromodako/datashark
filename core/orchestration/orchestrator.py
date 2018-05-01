@@ -80,7 +80,7 @@ class Orchestrator:
             elif self.whitelist_db.retrieve(result.data) is not None:
                 result.data.container.set_tag(Container.Tag.WHITELISTED)
 
-        self.hash_db.persist(result.data)
+        await self.hash_db.persist(result.data)
 
     async def _process_dissection_result(self, result):
         '''Treats all dissection result as intermediary results and inject new
@@ -101,7 +101,7 @@ class Orchestrator:
 
             await self.schedule_tasks([es_task])
 
-        self.dissection_db.persist(result.data)
+        await self.dissection_db.persist(result.data)
 
     async def _process_examination_result(self, result):
         '''Treats all examination result as final results and persist them into
@@ -110,7 +110,7 @@ class Orchestrator:
         if not isinstance(result.data, Examination):
             raise RuntimeError("result.data must be an Examination instance here!")
 
-        self.examination_db.persist(result.data)
+        await self.examination_db.persist(result.data)
 
     async def _process_examiner_selection_result(self, result):
         '''Adds examination tasks for each selected examiner

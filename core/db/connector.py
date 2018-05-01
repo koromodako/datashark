@@ -69,7 +69,7 @@ class DatabaseConnector(PluginInstance):
         '''Persists an object into the database
 
         Arguments:
-            objects {DatabaseObject} -- Dict or list of dicts representing
+            objects {DBObject} -- Dict or list of dicts representing
                                         object(s) to be created or updated an
                                         object.
         Returns:
@@ -91,15 +91,3 @@ class DatabaseConnector(PluginInstance):
         raise NotImplementedError("DatabaseConnector subclasses must implement"
                                   " retrieve() method.")
 
-    async def delete(self, query):
-        '''Deletes an object in the database
-
-        Arguments:
-            query {dict} -- Dict representation of a query which can be
-                            interpreted by the underlying database connector
-                            subclass to delete one or more objects.
-        Returns:
-            {int} - Number of objects deleted.
-        '''
-        raise NotImplementedError("DatabaseConnector subclasses must implement"
-                                  " delete() method.")
