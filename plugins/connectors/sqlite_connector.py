@@ -81,6 +81,8 @@ class SQLiteConnector(DatabaseConnector):
         self.conn = None
 
     async def _table_exists(self, obj):
+        '''Checks if table exists
+        '''
         query = "SELECT * FROM sqlite_master "
         query += "WHERE name='{}' ".format(obj['_meta']['index'])
         query += "AND type='table';"
@@ -93,6 +95,8 @@ class SQLiteConnector(DatabaseConnector):
         return (len(r) != 0)
 
     async def _create_table(self, obj):
+        '''Creates the table if it does not exist
+        '''
         query = "CREATE TABLE IF NOT EXISTS {}(".format(obj['_meta']['index'])
         for name, data_type in obj['_meta']['fields']:
             query += "{} {}, ".format(name,
@@ -101,24 +105,31 @@ class SQLiteConnector(DatabaseConnector):
 
         self.logger.debug("Querying database: {}".format(query))
         async with self.conn.cursor() as cursor:
-            r = await cursor.execute(query)
+            await cursor.execute(query)
 
     async def _insert_one(self, obj):
-        query_p1 = "INSERT INTO {}(".format(obj['_meta']['index'])
-        query_p2 = "VALUES("
-        for name, value in obj['_source'].items():
-            query_p1 += "{}, ".format(name)
-            query_p2 += "'{}', ".format(value)
-        query = query_p1[:-2] + ") " + query_p2[:-2] + ")"
+        '''Inserts a single object into the database
+
+        Notes:
+            it might be interesting to optimize the execution inserting
+            multiple records in a single call
+        '''
+        query = "INSERT INTO {} VALUES (".format(obj['_meta']['index'])
+        for _, value in obj['_source'].items():
+            query += "'{}', ".format(value)
+        query = query[:-2] + ");"
 
         self.logger.debug("Querying database: {}".format(query))
         async with self.conn.cursor() as cursor:
-            r = await cursor.execute(query)
+            await cursor.execute(query)
 
     async def persist(self, objects):
-        '''[summary]
+        '''Inserts a DBObject into underlying database creating a table if
+        needed
 
-        [description]
+        Notes:
+            it might be interesting to optimize the execution inserting
+            multiple records in a single call
         '''
         if not self._is_connected():
             self.logger.warning("persist() called on a closed connection!")
@@ -129,10 +140,10 @@ class SQLiteConnector(DatabaseConnector):
                 await self._create_table(obj)
             await self._insert_one(obj)
 
-    async def retrieve(self, query):
-        '''[summary]
+        await self.conn.commit()
 
-        [description]
+    async def retrieve(self, query):
+        '''Retrieves an object from the database using given query
         '''
         if not self._is_connected():
             self.logger.warning("retrieve() called on a closed connection!")

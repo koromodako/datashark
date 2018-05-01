@@ -1,10 +1,12 @@
+python-slugify
+pycryptodome
+python-magic
+ruamel.yaml
 munch
+
+psycopg2-binary
 aiopg
 aiomysql
 aioredis
 termcolor
 aiosqlite3
-ruamel.yaml
-python-magic
-pycryptodome
-python-slugify
