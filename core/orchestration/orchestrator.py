@@ -29,6 +29,7 @@ from asyncio import PriorityQueue, QueueEmpty, Queue, sleep
 from core.hash.hash import Hash
 from helper.logging.logger import Logger
 from core.orchestration.task import Task
+from core.container.container import Container
 from core.orchestration.worker_pool import WorkerPool
 # =============================================================================
 #  GLOBALS
@@ -48,6 +49,7 @@ class Orchestrator:
     def __init__(self,
                  conf,
                  hash_db,
+                 container_db,
                  whitelist_db,
                  blacklist_db,
                  dissection_db,
@@ -55,11 +57,14 @@ class Orchestrator:
         '''Constructs the object
         '''
         self.conf = conf
+
         self.hash_db = hash_db
+        self.container_db = container_db
         self.whitelist_db = whitelist_db
         self.blacklist_db = blacklist_db
         self.dissection_db = dissection_db
         self.examination_db = examination_db
+
         self.qin = PriorityQueue()
         self.qout = Queue()
         self.aborted = False
@@ -75,10 +80,10 @@ class Orchestrator:
         if self.conf.check_black_or_white:
 
             if self.blacklist_db.retrieve(result.data) is not None:
-                result.data.container.set_tag(Container.Tag.BLACKLISTED)
+                result.data.container.add_tag(Container.Tag.BLACKLISTED)
 
             elif self.whitelist_db.retrieve(result.data) is not None:
-                result.data.container.set_tag(Container.Tag.WHITELISTED)
+                result.data.container.add_tag(Container.Tag.WHITELISTED)
 
         await self.hash_db.persist(result.data)
 
@@ -120,9 +125,11 @@ class Orchestrator:
         if not isinstance(result.data, list):
             raise RuntimeError("result.data must be a list instance here!")
 
-        await self.schedule_tasks([Task(Task.Category.EXAMINATION,
-                                        examiner,
-                                        result.task.container) for examiner in result.data])
+        exam_tasks = [Task(Task.Category.EXAMINATION,
+                           examiner,
+                           result.task.container) for examiner in result.data]
+
+        await self.schedule_tasks(exam_tasks)
 
     async def _process_dissector_selection_result(self, result):
         '''Adds dissection tasks for each selected dissector
@@ -132,9 +139,11 @@ class Orchestrator:
         if not isinstance(result.data, list):
             raise RuntimeError("result.data must be a list instance here!")
 
-        await self.schedule_tasks([Task(Task.Category.DISSECTION,
-                                        dissector,
-                                        result.task.container) for dissector in result.data])
+        diss_tasks = [Task(Task.Category.DISSECTION,
+                           dissector,
+                           result.task.container) for dissector in result.data]
+
+        await self.schedule_tasks(diss_tasks)
 
     async def _process_result(self, result):
         '''Processes one result depending on task type
@@ -172,8 +181,13 @@ class Orchestrator:
         '''Schedules more tasks for processing
         '''
         for task in tasks:
-            LGR.debug("Pushing {} into processing queue.".format(task))
+            LGR.debug("Pushing task into processing queue: {}".format(task))
             await self.qin.put(task)
+
+            if not task.container.has_tag(Container.Tag.PERSISTED):
+                LGR.debug("Persisting container: {}".format(task.container))
+                await self.container_db.persist(task.container)
+                task.container.add_tag(Container.Tag.PERSISTED)
 
     async def process_tasks(self):
         '''Processes all tasks until the input queue is empty or abort()

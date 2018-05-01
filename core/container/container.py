@@ -25,6 +25,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from enum import Flag
 from uuid import UUID, uuid4
 from pathlib import Path
 from slugify import slugify
@@ -56,6 +57,14 @@ class Container(DBObject):
         ('size', DBObject.DataType.INT),
     ]
 
+    class Tag(Flag):
+        '''Tag flag values
+        '''
+        NONE        = 0x00
+        PERSISTED   = 0x01
+        WHITELISTED = 0x02
+        BLACKLISTED = 0x04
+
     def __init__(self,
                  name='',
                  path=Path(),
@@ -82,6 +91,7 @@ class Container(DBObject):
         if not isinstance(name, str):
             raise ValueError("name must be an instance of str")
 
+        self.tag = Container.Tag.NONE
         self.parent = parent
         self.path = path
         self.original_path = original_path
@@ -139,6 +149,31 @@ class Container(DBObject):
         self.mime_text = _source['mime_text']
         self.slug = _source['slug']
         self.size = _source['size']
+
+    def add_tag(self, tag):
+        '''Adds given tag which can be a OR-ed combination of tags
+
+        Arguments:
+            tag {Container.Tag} -- tag or combination of tags to add
+        '''
+        self.tag |= tag
+
+    def del_tag(self, tag):
+        '''Removes given tag which can be a OR-ed combination of tags
+
+        Arguments:
+            tag {Container.Tag} -- tag or combination of tags to remove
+        '''
+        self.tag ^= tag
+
+    def has_tag(self, tag):
+        '''Checks if container has given tag which can be a OR-ed combination
+        of tags
+
+        Arguments:
+            tag {Container.Tag} -- tag or combination of tags to check
+        '''
+        return ((self.tag & tag) == tag)
 
     def bin_file(self, mode=BinFile.OpenMode.READ):
         '''Opens a binary file for the container

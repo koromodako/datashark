@@ -23,6 +23,11 @@ hash_db_conf:
   connector: SQLiteConnector
   settings:
     path: /mnt/vms-share/ds-hash.db
+# Container database used to store all processed containers
+container_db_conf:
+  connector: SQLiteConnector
+  settings:
+    path: /mnt/vms-share/ds-container.db
 # Whitelist database used to flag legitimate files without
 # dissection/examination
 whitelist_db_conf:

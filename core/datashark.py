@@ -35,6 +35,7 @@ from core.orchestration.task import Task
 from core.container.container import Container
 from core.orchestration.worker import Worker
 from core.plugin.plugin_selector import PluginSelector
+from helper.filtering.path_filter import PathFilter
 from core.orchestration.orchestrator import Orchestrator
 # =============================================================================
 #  GLOBALS / CONFIG
@@ -49,17 +50,24 @@ class Datashark:
     [description]
     '''
     @staticmethod
-    def scan_dir(path, recurse):
+    def scan_dir(path, recurse, include, exclude):
         '''Scans recursively a directory and returns a list of all path
 
         Arguments:
             path {[type]} -- [description]
             recurse {[type]} -- [description]
         '''
-        if recurse:
-            return [f.resolve() for f in path.glob('**/*') if f.is_file()]
+        LGR.info("Scanning {} for files...".format(path))
 
-        return [f.resolve() for f in path.glob('*') if f.is_file()]
+        keep = PathFilter(include, exclude)
+
+        if recurse:
+            files = [f.resolve() for f in path.glob('**/*') if f.is_file() and keep(f)]
+        else:
+            files = [f.resolve() for f in path.glob('*') if f.is_file() and keep(f)]
+
+        LGR.info("Scan completed! ({} files)".format(len(files)))
+        return files
 
     def __init__(self, conf):
         '''[summary]
@@ -122,6 +130,7 @@ class Datashark:
         # initialize databases
         try:
             self.hash_db = await self._init_db('hash_db_conf')
+            self.container_db = await self._init_db('container_db_conf')
             self.whitelist_db = await self._init_db('whitelist_db_conf')
             self.blacklist_db = await self._init_db('blacklist_db_conf')
             self.dissection_db = await self._init_db('dissection_db_conf')
@@ -133,6 +142,7 @@ class Datashark:
         # create orchestrator
         self.orchestrator = Orchestrator(self.conf,
                                          self.hash_db,
+                                         self.container_db,
                                          self.whitelist_db,
                                          self.blacklist_db,
                                          self.dissection_db,
@@ -149,19 +159,24 @@ class Datashark:
             await self.orchestrator.abort()
         # terminate databases
         await self.hash_db.term()
+        await self.container_db.term()
         await self.whitelist_db.term()
         await self.blacklist_db.term()
         await self.dissection_db.term()
         await self.examination_db.term()
 
-    async def hash(self, path, recurse=False):
+    async def hash(self,
+                   path,
+                   recurse=False,
+                   include=[],
+                   exclude=[]):
         '''[summary]
 
         [description]
         '''
         files = [ path ]
         if path.is_dir():
-            files = self.scan_dir(path, recurse)
+            files = self.scan_dir(path, recurse, include, exclude)
 
         tasks = [Task(Task.Category.HASHING,
                       None,
@@ -171,14 +186,18 @@ class Datashark:
 
         await self._process_tasks(tasks)
 
-    async def dissect(self, path, recurse=False):
+    async def dissect(self,
+                      path,
+                      recurse=False,
+                      include=[],
+                      exclude=[]):
         '''[summary]
 
         [description]
         '''
         files = [ path ]
         if path.is_dir():
-            files = self.scan_dir(path, recurse)
+            files = self.scan_dir(path, recurse, include, exclude)
 
         tasks = []
         if self.conf.check_black_or_white:
@@ -196,14 +215,18 @@ class Datashark:
 
         await self._process_tasks(tasks)
 
-    async def examine(self, path, recurse=False):
+    async def examine(self,
+                      path,
+                      recurse=False,
+                      include=[],
+                      exclude=[]):
         '''[summary]
 
         [description]
         '''
         files = [ path ]
         if path.is_dir():
-            files = self.scan_dir(path, recurse)
+            files = self.scan_dir(path, recurse, include, exclude)
 
         tasks = []
         if self.conf.check_black_or_white:

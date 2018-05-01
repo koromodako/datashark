@@ -56,12 +56,26 @@ def parse_args():
     sp.required = True
     # --- hash
     hash_p = sp.add_parser('hash')
+    hash_p.add_argument('--include', '-i', default=[], nargs='+',
+                        help="Inclusion patterns. All elements that do not "
+                             "match these patterns will be excluded.")
+    hash_p.add_argument('--exclude', '-e', default=[], nargs='+',
+                        help="Exclusion patterns. All elements that "
+                             "match these patterns will be excluded, others "
+                             "will be kept.")
     hash_p.add_argument('--recurse', '-r', action='store_true',
                         help="Tells datashark to walk recursively if input is "
                              "a folder.")
     hash_p.add_argument('input', type=Path, help="File or directory to process")
     # --- dissect
     dissect_p = sp.add_parser('dissect')
+    dissect_p.add_argument('--include', '-i', default=[], nargs='+',
+                           help="Inclusion patterns. All elements that do not "
+                                "match these patterns will be excluded.")
+    dissect_p.add_argument('--exclude', '-e', default=[], nargs='+',
+                           help="Exclusion patterns. All elements that "
+                                "match these patterns will be excluded, others "
+                                "will be kept.")
     dissect_p.add_argument('--recurse', '-r', action='store_true',
                            help="Tells datashark to walk recursively if input is "
                              "a folder.")
@@ -71,6 +85,13 @@ def parse_args():
     dissect_p.add_argument('input', type=Path, help="File or directory to process")
     # --- examine
     examine_p = sp.add_parser('examine')
+    examine_p.add_argument('--include', '-i', default=[], nargs='+',
+                           help="Inclusion patterns. All elements that do not "
+                                "match these patterns will be excluded.")
+    examine_p.add_argument('--exclude', '-e', default=[], nargs='+',
+                           help="Exclusion patterns. All elements that "
+                                "match these patterns will be excluded, others "
+                                "will be kept.")
     examine_p.add_argument('--recurse', '-r', action='store_true',
                            help="Tells datashark to walk recursively if input is "
                              "a folder.")
@@ -122,13 +143,22 @@ async def main():
         return
 
     if args.command == 'hash':
-        await ds.hash(args.input, args.recurse)
+        await ds.hash(args.input,
+                      args.recurse,
+                      args.include,
+                      args.exclude)
 
     elif args.command == 'dissect':
-        await ds.dissect(args.input, args.recurse)
+        await ds.dissect(args.input,
+                         args.recurse,
+                         args.include,
+                         args.exclude)
 
     elif args.command == 'examine':
-        await ds.examine(args.input, args.recurse)
+        await ds.examine(args.input,
+                         args.recurse,
+                         args.include,
+                         args.exclude)
 
     await ds.term()
 # =============================================================================
