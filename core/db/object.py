@@ -39,6 +39,12 @@ class DBObject:
 
     [description]
     '''
+    EXPECTED_CONSTANTS = [
+        'INDEX',
+        'FIELDS',
+        'PRIMARY'
+    ]
+
     class DataType(Enum):
         '''DataType's type enumeration
 
@@ -60,6 +66,9 @@ class DBObject:
 
         Creates a dict which contains all persistent properties mapped with
         the appropriate field name
+
+        All keys in the dict which are not declared in FIELDS class constant
+        will not be persisted by DatabaseConnector subclasses.
         '''
         raise NotImplementedError("DBObject subclasses must implement "
                                   "_source() method.")
@@ -77,11 +86,22 @@ class DBObject:
 
         Creates a dict which contains all persistent properties and metadata
         associated with an object.
+
+        DBObject subclasses must define:
+            + INDEX:    object name to be used as index/table name
+            + FIELDS:   object fields in source with associated DBObject.DataType
+            + PRIMARY:  object primary field (unique key)
         '''
+        for constant in DBObject.EXPECTED_CONSTANTS:
+            if not constant in dir(self):
+                raise ValueError("DBObject must define the following class "
+                                 "constants: {}".format(DBObject.EXPECTED_CONSTANTS))
+
         return {
             '_meta': {
                 'index': self.INDEX,
-                'fields': self.FIELDS
+                'fields': self.FIELDS,
+                'primary': self.PRIMARY
             },
             '_source': self._source()
         }

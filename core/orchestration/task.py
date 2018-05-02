@@ -31,6 +31,7 @@ from uuid import uuid4
 from core.hash.hash import Hash
 from helper.exception import InvalidPluginTypeException
 from helper.logging.logger import Logger
+from core.container.container import Container
 from core.dissection.dissector import Dissector
 from core.examination.examiner import Examiner
 from core.plugin.plugin_selector import PluginSelector
@@ -207,9 +208,17 @@ class Task:
                 yield TaskResult(self, self._perform_examination())
 
             elif self.category == Task.Category.EXAMINER_SELECTION:
+
+                if self.container.has_tag(Container.Tag.BLACKLISTED|Container.Tag.WHITELISTED):
+                    yield TaskResult(self, None)
+
                 yield TaskResult(self, self._perform_examiner_selection())
 
             elif self.category == Task.Category.DISSECTOR_SELECTION:
+
+                if self.container.has_tag(Container.Tag.BLACKLISTED|Container.Tag.WHITELISTED):
+                    yield TaskResult(self, None)
+
                 yield TaskResult(self, self._perform_dissector_selection())
 
             self.succeeded = True

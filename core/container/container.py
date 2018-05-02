@@ -56,6 +56,7 @@ class Container(DBObject):
         ('slug', DBObject.DataType.STRING),
         ('size', DBObject.DataType.INT),
     ]
+    PRIMARY = 'uuid'
 
     class Tag(Flag):
         '''Tag flag values
@@ -82,6 +83,7 @@ class Container(DBObject):
             name {str} -- [description] (default: {None})
             magic_file {str} -- [description] (default: {None})
         '''
+        super().__init__()
         if not isinstance(parent, UUID):
             raise ValueError("parent must be an instance of uuid.UUID")
         if not isinstance(path, Path):
@@ -91,28 +93,64 @@ class Container(DBObject):
         if not isinstance(name, str):
             raise ValueError("name must be an instance of str")
 
-        self.tag = Container.Tag.NONE
-        self.parent = parent
-        self.path = path
-        self.original_path = original_path
-        self.slug = slugify(name)
+        self._tag = Container.Tag.NONE
+        self._parent = parent
+        self._path = path
+        self._original_path = original_path
+        self._slug = slugify(name)
         # computed once
-        self.uuid = uuid4()
-        self.size = None
+        self._uuid = uuid4()
+        self._size = None
         guesser = FileTypeGuesser(magic_file=magic_file)
-        self.mime_text = guesser.mime_text(self.path)
-        self.mime_type = guesser.mime_type(self.path)
-        if self.path is not None:
-            stat = self.path.stat()
-            self.size = stat.st_size
+        self._mime_text = guesser.mime_text(self._path)
+        self._mime_type = guesser.mime_type(self._path)
+        if self._path is not None:
+            stat = self._path.stat()
+            self._size = stat.st_size
 
     def __str__(self):
         '''String representation of the object
         '''
-        return "Container(uuid={},size={},mime={},path={})".format(self.uuid,
-                                                                   self.size,
-                                                                   self.mime_type,
-                                                                   self.path)
+        return "Container(uuid={},size={},mime={},path={})".format(self._uuid,
+                                                                   self._size,
+                                                                   self._mime_type,
+                                                                   self._path)
+
+    @property
+    def tag(self):
+        return self._tag
+
+    @property
+    def parent(self):
+        return self._parent
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def original_path(self):
+        return self._original_path
+
+    @property
+    def slug(self):
+        return self._slug
+
+    @property
+    def uuid(self):
+        return self._uuid
+
+    @property
+    def size(self):
+        return self._size
+
+    @property
+    def mime_type(self):
+        return self._mime_type
+
+    @property
+    def mime_text(self):
+        return self._mime_text
 
     def _source(self):
         '''Creates a document (dict) which can be used by any DatabaseConnector
@@ -123,14 +161,14 @@ class Container(DBObject):
             {dict} -- [description]
         '''
         return {
-            'uuid': self.uuid.urn,
-            'parent': self.parent.urn,
-            'path': str(self.path),
-            'original_path': str(self.original_path),
-            'mime_type': self.mime_type,
-            'mime_text': self.mime_text,
-            'slug': self.slug,
-            'size': self.size
+            'uuid': self._uuid.urn,
+            'parent': self._parent.urn,
+            'path': str(self._path),
+            'original_path': str(self._original_path),
+            'mime_type': self._mime_type,
+            'mime_text': self._mime_text,
+            'slug': self._slug,
+            'size': self._size
         }
 
     def from_db(self, _source):
@@ -141,14 +179,14 @@ class Container(DBObject):
         Arguments:
             _source {dict} -- [description]
         '''
-        self.uuid = UUID(_source['uuid'])
-        self.parent = UUID(_source['parent'])
-        self.path = Path(_source['path'])
-        self.original_path = Path(_source['original_path'])
-        self.mime_type = _source['mime_type']
-        self.mime_text = _source['mime_text']
-        self.slug = _source['slug']
-        self.size = _source['size']
+        self._uuid = UUID(_source['uuid'])
+        self._parent = UUID(_source['parent'])
+        self._path = Path(_source['path'])
+        self._original_path = Path(_source['original_path'])
+        self._mime_type = _source['mime_type']
+        self._mime_text = _source['mime_text']
+        self._slug = _source['slug']
+        self._size = _source['size']
 
     def add_tag(self, tag):
         '''Adds given tag which can be a OR-ed combination of tags
@@ -156,7 +194,7 @@ class Container(DBObject):
         Arguments:
             tag {Container.Tag} -- tag or combination of tags to add
         '''
-        self.tag |= tag
+        self._tag |= tag
 
     def del_tag(self, tag):
         '''Removes given tag which can be a OR-ed combination of tags
@@ -164,7 +202,7 @@ class Container(DBObject):
         Arguments:
             tag {Container.Tag} -- tag or combination of tags to remove
         '''
-        self.tag ^= tag
+        self._tag ^= tag
 
     def has_tag(self, tag):
         '''Checks if container has given tag which can be a OR-ed combination
@@ -173,16 +211,12 @@ class Container(DBObject):
         Arguments:
             tag {Container.Tag} -- tag or combination of tags to check
         '''
-        return ((self.tag & tag) == tag)
+        return ((self._tag & tag) == tag)
 
-    def bin_file(self, mode=BinFile.OpenMode.READ):
-        '''Opens a binary file for the container
-
-        Keyword Arguments:
-            mode {BinFile.OpenMode} -- Open mode for underlying binary file
-                                       (default: {BinFile.OpenMode.READ})
+    def bin_file(self):
+        '''Opens a read-only binary file for the container
 
         Returns:
             [BinFile] -- New instance of binary file
         '''
-        return BinFile(self.path, mode)
+        return BinFile(self._path, BinFile.OpenMode.READ)

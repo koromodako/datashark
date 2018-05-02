@@ -48,20 +48,43 @@ class Hash(DBObject):
         ('sha3_256', DBObject.DataType.STRING),
         ('container_uuid', DBObject.DataType.STRING)
     ]
+    PRIMARY = 'container_uuid'
+
+    HASHES = ['MD5', 'SHA1', 'SHA-256', 'SHA3-256']
 
     def __init__(self, container=None):
-        self.md5 = None
-        self.sha1 = None
-        self.sha_256 = None
-        self.sha3_256 = None
-        self.container = container
-        self.container_uuid = container.uuid
+        super().__init__()
+        self._md5 = None
+        self._sha1 = None
+        self._sha_256 = None
+        self._sha3_256 = None
+        self._container = container
+        self._container_uuid = container.uuid
         self._compute_hashes()
 
+    @property
+    def md5(self):
+        return self._md5
+
+    @property
+    def sha1(self):
+        return self._sha1
+
+    @property
+    def sha_256(self):
+        return self._sha_256
+
+    @property
+    def sha3_256(self):
+        return self._sha3_256
+
+    @property
+    def container_uuid(self):
+        return self._container_uuid
+
     def _compute_hashes(self):
-        hash_names = ['MD5', 'SHA1', 'SHA-256', 'SHA3-256']
-        result = Crypto.multihash(hash_names, self.container)
-        (self.md5, self.sha1, self.sha_256, self.sha3_256) = result
+        result = Crypto.multihash(Hash.HASHES, self._container)
+        (self._md5, self._sha1, self._sha_256, self._sha3_256) = result
 
     def _source(self):
         '''Creates a document (dict) which can be used by any DatabaseConnector
@@ -72,11 +95,11 @@ class Hash(DBObject):
             {dict} -- [description]
         '''
         return {
-            'md5': self.md5,
-            'sha1': self.sha1,
-            'sha_256': self.sha_256,
-            'sha3_256': self.sha3_256,
-            'container_uuid': self.container._source()['uuid']
+            'md5': self._md5,
+            'sha1': self._sha1,
+            'sha_256': self._sha_256,
+            'sha3_256': self._sha3_256,
+            'container_uuid': self._container._source()['uuid']
         }
 
     def from_db(self, _source):
@@ -87,8 +110,8 @@ class Hash(DBObject):
         Arguments:
             doc {dict} -- [description]
         '''
-        self.md5 = _source['md5']
-        self.sha1 = _source['sha1']
-        self.sha_256 = _source['sha_256']
-        self.sha3_256 = _source['sha3_256']
-        self.container_uuid = UUID(_source['container_uuid'])
+        self._md5 = _source['md5']
+        self._sha1 = _source['sha1']
+        self._sha_256 = _source['sha_256']
+        self._sha3_256 = _source['sha3_256']
+        self._container_uuid = UUID(_source['container_uuid'])

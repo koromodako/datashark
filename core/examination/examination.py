@@ -34,3 +34,40 @@ LGR = Logger(Logger.Category.CORE, __name__)
 #  CLASSES
 # =============================================================================
 
+class Examination(DBObject):
+    '''[summary]
+
+    [description]
+    '''
+    INDEX = 'examination'
+    FIELDS = []
+    PRIMARY = ''
+
+    def __init__(self):
+        '''[summary]
+
+        [description]
+        '''
+        super().__init__()
+
+    def _source(self):
+        '''Creates a document (dict) which can be used by any DatabaseConnector
+
+        Creates a dict which contains all persistent properties of an object.
+
+        Returns:
+            {dict} -- [description]
+        '''
+        raise NotImplementedError("DBObject subclasses must implement "
+                                  "_source() method.")
+
+    def from_db(self, doc):
+        '''Loads a document (dict) which is returned by any DatabaseConnector
+
+        Loads all persistent properties of an object from a dict.
+
+        Arguments:
+            doc {dict} -- [description]
+        '''
+        raise NotImplementedError("DBObject subclasses must implement "
+                                  "to_db() method.")

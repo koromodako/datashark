@@ -122,6 +122,13 @@ class Orchestrator:
 
         Does nothing if no appropriate examiner was found
         '''
+        if result.data is None:
+            # task was not executed which means the container is blacklisted
+            # or whitelisted here. Persist container again to ensure tag is
+            # up-to-date in DB.
+            await self.container_db.persist(container)
+            return
+
         if not isinstance(result.data, list):
             raise RuntimeError("result.data must be a list instance here!")
 
@@ -136,6 +143,13 @@ class Orchestrator:
 
         Does nothing if no appropriate dissector was found
         '''
+        if result.data is None:
+            # task was not executed which means the container is blacklisted
+            # or whitelisted here. Persist container again to ensure tag is
+            # up-to-date in DB.
+            self.container_db.persist(container)
+            return
+
         if not isinstance(result.data, list):
             raise RuntimeError("result.data must be a list instance here!")
 
