@@ -34,6 +34,7 @@ from core.datashark import Datashark
 from plugins.plugins import PLUGINS
 from core.configuration import Configuration
 from helper.logging.logger import Logger
+from core.container.file_type_guesser import FileTypeGuesser
 # =============================================================================
 #  GLOBALS
 # =============================================================================
@@ -78,7 +79,7 @@ def parse_args():
                                 "will be kept.")
     dissect_p.add_argument('--recurse', '-r', action='store_true',
                            help="Tells datashark to walk recursively if input is "
-                             "a folder.")
+                                "a folder.")
     dissect_p.add_argument('--examine', help="Perform examination for each "
                                              "container extracted during "
                                              "dissection process.")
@@ -94,12 +95,16 @@ def parse_args():
                                 "will be kept.")
     examine_p.add_argument('--recurse', '-r', action='store_true',
                            help="Tells datashark to walk recursively if input is "
-                             "a folder.")
+                                "a folder.")
     examine_p.add_argument('input', type=Path, help="File or directory to process")
     # --- plugins
     plugins_p = sp.add_parser('plugins')
     # --- version
     version_p = sp.add_parser('version')
+    # --- mime
+    mime_p = sp.add_parser('mime')
+    mime_p.add_argument('--magic-file', '-m', type=Path, help="Magic file to be used.")
+    mime_p.add_argument('input', nargs='+', type=Path, help="Files.")
     # - parse arguments now
     return p.parse_args()
 
@@ -132,6 +137,14 @@ async def main():
 
     if args.command == 'plugins':
         print(PLUGINS.list())
+        return
+
+    if args.command == 'mime':
+        guesser = FileTypeGuesser(magic_file=args.magic_file)
+        for f in args.input:
+            print("{} [{}]: {}".format(f,
+                                       guesser.mime_type(f),
+                                       guesser.mime_text(f)))
         return
 
     LGR.debug(PLUGINS.list())

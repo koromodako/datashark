@@ -26,6 +26,7 @@
 #  IMPORTS
 # =============================================================================
 from magic import Magic
+from pathlib import Path
 from helper.logging.logger import Logger
 # =============================================================================
 #  GLOBALS
@@ -44,6 +45,9 @@ class FileTypeGuesser:
         Keyword Arguments:
             magic_file {str} -- Magic database to use (default: {None})
         '''
+        if isinstance(magic_file, Path):
+            magic_file = str(magic_file)
+
         self.magic_file = magic_file
 
     def mime_text(self, path):
