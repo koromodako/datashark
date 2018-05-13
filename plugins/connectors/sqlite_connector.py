@@ -25,6 +25,7 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
+from pathlib import Path
 from aiosqlite3 import connect
 from core.db.object import DBObject
 from core.db.connector import DatabaseConnector
@@ -64,7 +65,15 @@ class SQLiteConnector(DatabaseConnector):
         '''Opens underlying connection
         '''
         if self._is_connected():
-            self.logger.warning("connect() called on an opened connection!")
+            self.logger.warning("called on an opened connection!")
+            return False
+
+        db_path = Path(self.conf.path)
+
+        try:
+            db_path.touch()
+        except Exception as e:
+            self.logger.error("cannot write {} due to invalid permissions!".format(db_path))
             return False
 
         self.conn = await connect(self.conf.path)
@@ -74,7 +83,7 @@ class SQLiteConnector(DatabaseConnector):
         '''Closes underlying connection
         '''
         if not self._is_connected():
-            self.logger.warning("disconnect() called on a closed connection!")
+            self.logger.warning("called on a closed connection!")
             return
 
         await self.conn.close()
