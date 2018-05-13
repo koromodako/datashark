@@ -55,14 +55,19 @@ class PluginSelector:
         Arguments:
             container {[type]} -- [description]
         '''
+        count = 0
         examiners = []
 
         for name, plugin in PLUGINS.plugins(Plugin.Category.EXAMINER):
+            count += 1
             examiner = plugin.instance(None)
 
             if examiner.can_examine(container):
                 LGR.debug("Examiner selected: {}".format(name))
                 examiners.append(examiner)
+
+        if count == 0:
+            LGR.warning("No examiner plugin registered.")
 
         return examiners
 
@@ -73,13 +78,18 @@ class PluginSelector:
         Arguments:
             container {[type]} -- [description]
         '''
+        count = 0
         dissectors = []
 
         for name, plugin in PLUGINS.plugins(Plugin.Category.DISSECTOR):
+            count += 1
             dissector = plugin.instance(None)
 
             if dissectors.can_dissect(container):
                 LGR.debug("Dissector selected: {}".format(name))
                 dissectors.append(dissector)
+
+        if count == 0:
+            LGR.warning("No dissector plugin registered.")
 
         return dissectors

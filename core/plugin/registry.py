@@ -78,7 +78,7 @@ class Registry:
         Returns:
             [type] -- [description]
         '''
-        return self._plugins.get(category).items()
+        return self._plugins.get(category, {}).items()
 
     def instanciate(self, category, name, conf, **kwargs):
         '''Returns a plugin instance
