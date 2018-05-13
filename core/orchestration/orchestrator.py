@@ -26,6 +26,7 @@
 #  IMPORTS
 # =============================================================================
 from asyncio import PriorityQueue, QueueEmpty, Queue, sleep
+from core.db.query import DBQuery
 from core.hash.hash import Hash
 from helper.logging.logger import Logger
 from core.orchestration.task import Task
@@ -79,10 +80,10 @@ class Orchestrator:
 
         if self.conf.check_black_or_white:
 
-            if self.blacklist_db.retrieve(result.data) is not None:
+            if self.blacklist_db.retrieve(DBQuery(result.data)) is not None:
                 result.data.container.add_tag(Container.Tag.BLACKLISTED)
 
-            elif self.whitelist_db.retrieve(result.data) is not None:
+            elif self.whitelist_db.retrieve(DBQuery(result.data)) is not None:
                 result.data.container.add_tag(Container.Tag.WHITELISTED)
 
         await self.hash_db.persist(result.data)

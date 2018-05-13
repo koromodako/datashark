@@ -1,6 +1,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#     file: query.py
-#     date: 2018-05-01
+#     file: evt.py
+#     date: 2018-05-13
 #   author: paul.dautry
 #  purpose:
 #
@@ -25,15 +25,44 @@
 # =============================================================================
 #  IMPORTS
 # =============================================================================
-from helper.logging.logger import Logger
-# =============================================================================
-#  GLOBALS / CONFIG
-# =============================================================================
-LGR = Logger(Logger.Category.CORE, 'query')
+from core.dissection.dissector import Dissector
 # =============================================================================
 #  CLASSES
 # =============================================================================
-class DBQuery:
+class EVTDissector(Dissector):
+    '''EVTDissector
+    '''
+    def __init__(self, conf):
+        '''Constructs an object
 
-    def __init__(self):
-        pass
+        Arguments:
+            conf {Configuration} -- [description]
+        '''
+        super().__init__(conf)
+
+    def supported_mime_types(self):
+        '''Gives a list of MIME types which can be handled by this dissector
+        '''
+        self.logger.todo("implement EVTDissector.supported_mime_types() method.")
+
+    def can_dissect(self, container):
+        '''Checks if dissection can be performed
+
+        Checks if underlying dissector instance is able to perform a dissection
+        of this container.
+
+        Arguments:
+            container {Container} -- Container to check for dissection
+                                     compatibility
+        '''
+        self.logger.todo("implement EVTDissector.can_dissect() method.")
+
+    def containers(self, container):
+        '''Extract containers from given container
+
+        Performs the dissection of the container.
+
+        Arguments:
+            container {Container} -- Container to dissect
+        '''
+        self.logger.todo("implement EVTDissector.containers() method.")

@@ -34,7 +34,22 @@ from core.plugin.registry import Registry
 # -----------------------------------------------------------------------------
 #  DISSECTORS
 # -----------------------------------------------------------------------------
-#from plugins.dissectors.class_dissector import ClassDissector
+from plugins.dissectors.evt import EVTDissector
+from plugins.dissectors.ewf import EWFDissector
+from plugins.dissectors.exe import EXEDissector
+from plugins.dissectors.lnk import LNKDissector
+from plugins.dissectors.nk2 import NK2Dissector
+from plugins.dissectors.pff import PFFDissector
+from plugins.dissectors.creg import CREGDissector
+from plugins.dissectors.qcow import QCOWDissector
+from plugins.dissectors.evtx import EVTXDissector
+from plugins.dissectors.regf import REGFDissector
+from plugins.dissectors.scca import SCCADissector
+from plugins.dissectors.vhdi import VHDIDissector
+from plugins.dissectors.vmdk import VMDKDissector
+from plugins.dissectors.esedb import ESEDBDissector
+from plugins.dissectors.olecf import OLECFDissector
+from plugins.dissectors.msiecf import MSIECFDissector
 # -----------------------------------------------------------------------------
 #  DB CONNECTORS
 # -----------------------------------------------------------------------------
@@ -55,7 +70,22 @@ PLUGINS = Registry()
 # -----------------------------------------------------------------------------
 #  DISSECTORS
 # -----------------------------------------------------------------------------
-#PLUGINS.register(Plugin.Category.DISSECTOR, )
+PLUGINS.register(Plugin.Category.DISSECTOR, PFFDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, EVTDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, EWFDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, EXEDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, LNKDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, NK2Dissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, EVTXDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, CREGDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, QCOWDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, REGFDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, SCCADissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, VHDIDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, VMDKDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, ESEDBDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, OLECFDissector)
+PLUGINS.register(Plugin.Category.DISSECTOR, MSIECFDissector)
 # -----------------------------------------------------------------------------
 #  DB CONNECTORS
 # -----------------------------------------------------------------------------
