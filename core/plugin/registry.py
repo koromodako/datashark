@@ -80,7 +80,7 @@ class Registry:
         '''
         return self._plugins.get(category).items()
 
-    def instanciate(self, category, name, conf):
+    def instanciate(self, category, name, conf, **kwargs):
         '''Returns a plugin instance
 
         Arguments:
@@ -97,4 +97,4 @@ class Registry:
                       "(category={},name={})".format(category, name))
             return None
 
-        return plugin.instance(conf)
+        return plugin.instance(conf, **kwargs)

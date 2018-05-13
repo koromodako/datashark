@@ -38,10 +38,13 @@ LGR = Logger(Logger.Category.CORE, __name__)
 class PluginSelector:
 
     @staticmethod
-    def select_db_connector(name, settings):
+    def select_db_connector(name, settings, read_only):
         '''[summary]
         '''
-        conn = PLUGINS.instanciate(Plugin.Category.DB_CONNECTOR, name, settings)
+        conn = PLUGINS.instanciate(Plugin.Category.DB_CONNECTOR,
+                                   name,
+                                   settings,
+                                   read_only=read_only)
         LGR.debug("Connector selected: {}".format(conn))
         return conn
 

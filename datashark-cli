@@ -160,6 +160,7 @@ async def main():
                          args.include,
                          args.exclude)
 
+    LGR.info("Done.")
     await ds.term()
 # =============================================================================
 #  SCRIPT

@@ -81,7 +81,7 @@ class Datashark:
         self.conf = conf
         self.orchestrator = None
 
-    async def _init_db(self, conf_key):
+    async def _init_db(self, conf_key, read_only):
         '''[summary]
 
         [description]
@@ -92,7 +92,8 @@ class Datashark:
                                                   "{}".format(conf_key))
 
         conn = PluginSelector.select_db_connector(db_conf.get('connector'),
-                                                  db_conf.get('settings'))
+                                                  db_conf.get('settings'),
+                                                  read_only)
         if conn is None:
             raise DatabaseInitializationException("Failed to instanciate "
                                                   "connector. Details above.")
@@ -129,12 +130,18 @@ class Datashark:
         self.conf['check_black_or_white'] = check_black_or_white
         # initialize databases
         try:
-            self.hash_db = await self._init_db('hash_db_conf')
-            self.container_db = await self._init_db('container_db_conf')
-            self.whitelist_db = await self._init_db('whitelist_db_conf')
-            self.blacklist_db = await self._init_db('blacklist_db_conf')
-            self.dissection_db = await self._init_db('dissection_db_conf')
-            self.examination_db = await self._init_db('examination_db_conf')
+            self.hash_db = await self._init_db('hash_db_conf',
+                                               read_only=False)
+            self.container_db = await self._init_db('container_db_conf',
+                                                    read_only=False)
+            self.whitelist_db = await self._init_db('whitelist_db_conf',
+                                                    read_only=True)
+            self.blacklist_db = await self._init_db('blacklist_db_conf',
+                                                    read_only=True)
+            self.dissection_db = await self._init_db('dissection_db_conf',
+                                                     read_only=False)
+            self.examination_db = await self._init_db('examination_db_conf',
+                                                      read_only=False)
         except DatabaseInitializationException as e:
             LGR.exception("An exception occured while initializing databases. "
                           "Details below.")

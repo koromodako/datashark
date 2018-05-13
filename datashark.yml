@@ -18,16 +18,6 @@ silent: false
 ## -----------------------------------------------------------------------------
 ## DATABASES
 ## -----------------------------------------------------------------------------
-# Hash database used to store hashes generated during hashing process
-hash_db_conf:
-  connector: SQLiteConnector
-  settings:
-    path: /mnt/vms-share/ds-hash.db
-# Container database used to store all processed containers
-container_db_conf:
-  connector: SQLiteConnector
-  settings:
-    path: /mnt/vms-share/ds-container.db
 # Whitelist database used to flag legitimate files without
 # dissection/examination
 whitelist_db_conf:
@@ -40,6 +30,16 @@ blacklist_db_conf:
   connector: SQLiteConnector
   settings:
     path: /mnt/vms-share/ds-blacklist.db
+# Hash database used to store hashes generated during hashing process
+hash_db_conf:
+  connector: SQLiteConnector
+  settings:
+    path: /mnt/vms-share/ds-hash.db
+# Container database used to store all processed containers
+container_db_conf:
+  connector: SQLiteConnector
+  settings:
+    path: /mnt/vms-share/ds-container.db
 # Dissection database used to store dissection results. It can be seen as the
 # full file hierarchy extracted from a given root container
 dissection_db_conf:

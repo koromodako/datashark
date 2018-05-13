@@ -42,10 +42,12 @@ class PathFilter:
     def __call__(self, path):
         for pattern in self.include:
             if path.match(pattern):
+                LGR.debug("included path: {}".format(path))
                 return True
 
         for pattern in self.exclude:
             if path.match(pattern):
+                LGR.debug("excluded path: {}".format(path))
                 return False
 
         return True

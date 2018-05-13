@@ -63,7 +63,7 @@ class Plugin:
         return "Plugin(category={},instance_cls={})".format(self.category,
                                                             self.instance_cls)
 
-    def instance(self, conf):
+    def instance(self, conf, **kwargs):
         '''Plugin instance factory
 
         Datashark framework ensure that this operation is called and is
@@ -76,7 +76,7 @@ class Plugin:
         Arguments:
             conf {Configuration} -- Configuration
         '''
-        return self.instance_cls(conf)
+        return self.instance_cls(conf, **kwargs)
 
 class PluginInstance:
     '''[summary]

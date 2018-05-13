@@ -45,10 +45,10 @@ class SQLiteConnector(DatabaseConnector):
         DBObject.DataType.STRING: 'TEXT'
     }
 
-    def __init__(self, conf):
+    def __init__(self, conf, read_only):
         '''Constructs the object
         '''
-        super().__init__(conf)
+        super().__init__(conf, read_only)
         self.conn = None
 
     def __str__(self):
@@ -68,15 +68,18 @@ class SQLiteConnector(DatabaseConnector):
             self.logger.warning("called on an opened connection!")
             return False
 
-        db_path = Path(self.conf.path)
-
         try:
-            db_path.touch()
+            Path(self.conf.path).parent.joinpath('perm-test.ds').touch()
         except Exception as e:
-            self.logger.error("cannot write {} due to invalid permissions!".format(db_path))
+            self.logger.error("cannot write {} due to invalid permissions!".format(
+                              self.conf.path))
             return False
 
-        self.conn = await connect(self.conf.path)
+        uri = 'file:{}'.format(self.conf.path)
+        if self.read_only:
+            uri += '?mode=ro'
+
+        self.conn = await connect(uri, uri=True)
         return True
 
     async def disconnect(self):
