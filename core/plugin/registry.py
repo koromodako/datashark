@@ -1,12 +1,12 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #     file: registry.py
 #     date: 2018-03-25
-#   author: paul.dautry
+#   author: koromodako
 #  purpose:
 #
 #  license:
 #    Datashark Forensic framework to process data containers.
-#    Copyright (C) 2018 paul.dautry
+#    Copyright (C) 2018 koromodako
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
